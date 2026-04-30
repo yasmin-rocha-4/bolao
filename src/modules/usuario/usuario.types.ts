@@ -1,10 +1,4 @@
-export interface Usuario {
-id?: number;
-nome: string;
-cpf: string;
-email: string;
-telefone?: string;
-tipo_usuario: string;
-senha: string;
-status: string;
-}
+import {z} from 'zod';
+import { createUsuarioSchema } from './usuario.schema.js';
+
+export type CreateUsuarioDTO = z.infer<typeof createUsuarioSchema>;

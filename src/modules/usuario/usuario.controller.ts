@@ -23,46 +23,39 @@ export const getById = async (req: Request, res: Response) => {
 };
 
 // CRIAR USUÁRIO
-export const create = async (req: Request, res: Response) => {
-  const {
-    nome,
-    cpf,
-    email,
-    telefone,
-    tipo_usuario,
-    senha,
-    status,
-  } = req.body;
+export const create = async (req: Request, res: Response): Promise<Response> => {
+    
+    try {
 
-  const novoUsuario = await prisma.usuario.create({
-    data: {
-      nome,
-      cpf,
-      email,
-      telefone,
-      tipo_usuario,
-      senha,
-      status,
-    },
-  });
+        const data = req.body; 
 
-  res.status(201).json(novoUsuario);
+        const novoUsuario = await prisma.usuario.create({
+            data
+        });
+        return res.status(201).json(novoUsuario);
+
+    } catch (error:any) {
+        /*
+        Retorno padrão de erro de validação
+        */
+        console.error("Erro ao criar usuário:", error);
+        return res.status(400).json({ error: "Erro ao criar usuário" });
+    }
 };
 
 // ATUALIZAR USUÁRIO
-export const update = async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
 
-  try {
-    const atualizado = await prisma.usuario.update({
-      where: { id },
-      data: req.body,
+export const update = async (req: Request, res: Response): Promise<Response> => {
+    
+
+    const { id } = req.params;
+
+    const updatedUsuario = await prisma.usuario.update({
+        where: { id: Number(id) },
+        data: req.body
     });
-
-    res.json(atualizado);
-  } catch (error) {
-    return res.status(404).json({ error: "Usuário não encontrado" });
-  }
+    // Lógica para atualizar um usuário
+    return res.status(200).json({ obj: updatedUsuario, message: "Usuário atualizado com sucesso" });
 };
 
 // DELETAR USUÁRIO

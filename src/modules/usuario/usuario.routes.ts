@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { validate } from "../../utils/validate.js";
 import {
   getAll,
   getById,
@@ -6,7 +7,7 @@ import {
   update,
   remove,
 } from "./usuario.controller.js";
-
+import * as usuarioSchema from './usuario.schema.js'
 const router = Router();
 
 // LISTAR TODOS
@@ -16,10 +17,12 @@ router.get("/", getAll);
 router.get("/:id", getById);
 
 // CRIAR
-router.post("/", create);
 
+router.post('/', validate(usuarioSchema.createUsuarioSchema), create);
 // ATUALIZAR
-router.put("/:id", update);
+
+router.put('/:id', validate(usuarioSchema.updateUsuarioSchema), update);
+
 
 // DELETAR
 router.delete("/:id", remove);
