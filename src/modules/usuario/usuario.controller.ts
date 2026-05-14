@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
-import prisma from "../../prisma/prismaClient.js";
+import prisma from "../../prisma/prismaClient";
+import { createUsuarioSchema } from "./usuario.schema";
 
 // LISTAR TODOS
 export const getAll = async (req: Request, res: Response) => {
@@ -23,26 +24,31 @@ export const getById = async (req: Request, res: Response) => {
 };
 
 // CRIAR USUÁRIO
-export const create = async (req: Request, res: Response): Promise<Response> => {
-    
-    try {
+export const create = async (req: Request, res: Response) => {
 
-        const data = req.body; 
+  console.log("🚨 ENTROU NO CREATE");
 
-        const novoUsuario = await prisma.usuario.create({
-            data
-        });
-        return res.status(201).json(novoUsuario);
+  const validation = createUsuarioSchema.safeParse(req.body);
 
-    } catch (error:any) {
-        /*
-        Retorno padrão de erro de validação
-        */
-        console.error("Erro ao criar usuário:", error);
-        return res.status(400).json({ error: "Erro ao criar usuário" });
-    }
+  console.log("VALIDAÇÃO:", validation);
+
+  if (!validation.success) {
+    console.log("❌ BLOQUEOU NO ZOD");
+
+    return res.status(400).json({
+      mensagem: "Dados inválidos",
+      erros: validation.error.format()
+    });
+  }
+
+  console.log("✅ PASSOU NO ZOD");
+
+  const usuario = await prisma.usuario.create({
+    data: validation.data
+  });
+
+  return res.status(201).json(usuario);
 };
-
 // ATUALIZAR USUÁRIO
 
 export const update = async (req: Request, res: Response): Promise<Response> => {

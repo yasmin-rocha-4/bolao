@@ -33,19 +33,26 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const validate_js_1 = require("../../utils/validate.js");
-const usuario_controller_js_1 = require("./usuario.controller.js");
-const usuarioSchema = __importStar(require("./usuario.schema.js"));
-const router = (0, express_1.Router)();
-// LISTAR TODOS
-router.get("/", usuario_controller_js_1.getAll);
-// BUSCAR POR ID
-router.get("/:id", usuario_controller_js_1.getById);
-// CRIAR
-router.post('/', (0, validate_js_1.validate)(usuarioSchema.createUsuarioSchema), usuario_controller_js_1.create);
-// ATUALIZAR
-router.put('/:id', (0, validate_js_1.validate)(usuarioSchema.updateUsuarioSchema), usuario_controller_js_1.update);
-// DELETAR
-router.delete("/:id", usuario_controller_js_1.remove);
-exports.default = router;
+exports.validate = void 0;
+const z = __importStar(require("zod"));
+const validate = (schema) => (req, res, next) => {
+    try {
+        req.body = schema.parse(req.body);
+        next();
+    }
+    catch (error) {
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({
+                error: "Erro de validação",
+                details: error.issues.map(issue => ({
+                    campo: issue.path.join("."),
+                    mensagem: issue.message
+                }))
+            });
+        }
+        return res.status(500).json({
+            error: "Erro interno",
+        });
+    }
+};
+exports.validate = validate;
