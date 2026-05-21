@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { validate } from "../../utils/validate.js";
+import { validate } from "../../utils/validate";
 import {
   getAll,
   getById,
@@ -7,7 +7,7 @@ import {
   update,
   remove,
 } from "./usuario.controller.js";
-import * as usuarioSchema from './usuario.schema.js'
+import * as usuarioSchema from './usuario.schema'
 const router = Router();
 
 // LISTAR TODOS

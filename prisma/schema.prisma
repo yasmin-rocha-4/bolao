@@ -7,8 +7,8 @@ generator client {
   provider = "prisma-client-js"
 }
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+   provider = "postgresql"
+   url      = env("DATABASE_URL")
 }
 model Usuario {
   id Int @id @default(autoincrement())
@@ -30,4 +30,24 @@ model Campanha {
   tipo_campanha_id Boolean
   codigo_campanha String
   status String
+  opcoes CampanhaOpcoes[]
+}
+
+model CampanhaOpcoes {
+  id Int @id @default(autoincrement())
+
+  campanha_id          Int
+  campanha             Campanha         @relation(fields: [campanha_id], references: [id])
+
+  descricao            String
+
+  status               String
+
+  eh_resultado_final   Boolean          @default(false)
+
+  created_at           DateTime         @default(now())
+  updated_at           DateTime         @updatedAt
+
+  @@unique([campanha_id, descricao])
+
 }
