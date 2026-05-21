@@ -8,7 +8,7 @@ export const createCampanhaSchema = z.object({
   tx_operacional: z.coerce.number(),
   valor_bolao: z.coerce.number(),
 
-  tipo_campanha_id: z.boolean(),
+  is_publica: z.boolean(),
   codigo_campanha: z.string(),
   
   status: z.string().min(5, "O status deve ter no minimo 5 caracteres")
@@ -22,7 +22,7 @@ export const updateCampanhaSchema = z.object({
   tx_operacional: z.coerce.number().optional(),
   valor_bolao: z.coerce.number().optional(),
 
-  tipo_campanha_id: z.boolean().optional(),
+  is_publica: z.boolean().optional(),
 
   codigo_campanha: z.string().optional(),
 

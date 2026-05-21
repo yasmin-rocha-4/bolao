@@ -19,6 +19,7 @@ model Usuario {
   tipo_usuario String
   senha String
   status String
+  apostas Aposta[]
 }
 model Campanha {
   id Int @id @default(autoincrement())
@@ -27,7 +28,7 @@ model Campanha {
   data_fim DateTime
   tx_operacional Decimal @db.Decimal(10, 2)
   valor_bolao Decimal @db.Decimal(10, 2)
-  tipo_campanha_id Boolean
+  is_publica Boolean
   codigo_campanha String
   status String
   opcoes CampanhaOpcoes[]
@@ -49,5 +50,36 @@ model CampanhaOpcoes {
   updated_at           DateTime         @updatedAt
 
   @@unique([campanha_id, descricao])
+  apostas Aposta[]
 
+}
+
+model Aposta {
+  id Int @id @default(autoincrement())
+
+  usuario_id Int
+  usuario Usuario @relation(fields: [usuario_id], references: [id])
+
+  campanha_opcao_id Int
+  campanhaOpcao CampanhaOpcoes @relation(fields: [campanha_opcao_id], references: [id])
+
+  status String
+
+  meio_pagamento MeioPagamentoTipo
+
+  comprovante String?
+
+  dt_criacao DateTime @default(now())
+
+
+  @@index([usuario_id])
+  @@index([campanha_opcao_id])
+  @@index([status])
+}
+
+enum MeioPagamentoTipo {
+  PIX
+  CARTAO_CREDITO
+  CARTAO_DEBITO
+  BOLETO
 }
