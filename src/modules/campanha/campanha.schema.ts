@@ -1,4 +1,8 @@
-import {z} from 'zod';
+import { z } from "zod";
+import {
+  extendZodWithOpenApi,
+  OpenAPIRegistry,
+} from "@asteasolutions/zod-to-openapi";
 export const createCampanhaSchema = z.object({
   nome: z.string().min(3, "o nome deve ter no minimo 3 caracteres"),
 
@@ -10,8 +14,8 @@ export const createCampanhaSchema = z.object({
 
   is_publica: z.boolean(),
   codigo_campanha: z.string(),
-  
-  status: z.string().min(5, "O status deve ter no minimo 5 caracteres")
+
+  status: z.string().min(5, "O status deve ter no minimo 5 caracteres"),
 });
 export const updateCampanhaSchema = z.object({
   nome: z.string().min(3, "o nome deve ter no minimo 3 caracteres").optional(),
@@ -26,5 +30,9 @@ export const updateCampanhaSchema = z.object({
 
   codigo_campanha: z.string().optional(),
 
-  status: z.string().min(5, "O status deve ter no minimo 5 caracteres").optional()
+  status: z
+    .string()
+    .min(5, "O status deve ter no minimo 5 caracteres")
+    .optional(),
 });
+extendZodWithOpenApi(z);

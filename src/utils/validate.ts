@@ -1,20 +1,22 @@
 import { Request, Response, NextFunction } from "express";
-import * as z from "zod";
+import { z } from "zod";
+
+type RequestSegment = "body" | "params" | "query";
 
 export const validate =
-  <T extends z.ZodType>(schema: T) =>
+  <T extends z.ZodType>(schema: T, segment: RequestSegment = "body") =>
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      req.body = schema.parse(req.body);
+      req[segment] = schema.parse(req[segment]);
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({
           error: "Erro de validação",
-          details: error.issues.map(issue => ({
+          details: error.issues.map((issue) => ({
             campo: issue.path.join("."),
-            mensagem: issue.message
-          }))
+            mensagem: issue.message,
+          })),
         });
       }
 
@@ -23,4 +25,3 @@ export const validate =
       });
     }
   };
-
