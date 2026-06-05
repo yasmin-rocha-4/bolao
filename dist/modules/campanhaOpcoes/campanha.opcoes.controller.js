@@ -1,15 +1,10 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.remove = exports.findById = exports.findAll = exports.update = exports.create = void 0;
-const prismaClient_1 = __importDefault(require("../../prisma/prismaClient"));
-const campanha_opcoes_schema_1 = require("./campanha.opcoes.schema");
-// CRIAR OPÇÃO DA CAMPANHA
+const campanha_opcoes_service_js_1 = require("./campanha.opcoes.service.js");
+const campanha_opcoes_schema_js_1 = require("./campanha.opcoes.schema.js");
 const create = async (req, res) => {
-    const validation = campanha_opcoes_schema_1.createCampanhaOpcoesSchema.safeParse(req.body);
-    console.log("VALIDAÇÃO:", validation);
+    const validation = campanha_opcoes_schema_js_1.createCampanhaOpcoesSchema.safeParse(req.body);
     if (!validation.success) {
         return res.status(400).json({
             mensagem: "Dados inválidos",
@@ -17,43 +12,16 @@ const create = async (req, res) => {
         });
     }
     try {
-        const campanhaOpcao = await prismaClient_1.default.campanhaOpcoes.create({
-            data: {
-                descricao: validation.data.descricao,
-                status: validation.data.status,
-                eh_resultado_final: validation.data.eh_resultado_final ?? false,
-                campanha: {
-                    connect: {
-                        id: Number(validation.data.campanha_id),
-                    },
-                },
-            },
-        });
-        return res.status(201).json(campanhaOpcao);
+        const opcao = await campanha_opcoes_service_js_1.campanhaOpcoesService.create(validation.data);
+        return res.status(201).json(opcao);
     }
     catch (error) {
-        // FK inválida
-        if (error.code === "P2003") {
-            return res.status(400).json({
-                mensagem: "Campanha inválida",
-            });
-        }
-        // UNIQUE (campanha_id + descricao)
-        if (error.code === "P2002") {
-            return res.status(409).json({
-                mensagem: "Já existe uma opção com essa descrição nesta campanha",
-            });
-        }
-        return res.status(500).json({
-            mensagem: "Erro interno",
-        });
+        return res.status(400).json({ mensagem: error.message });
     }
 };
 exports.create = create;
-// ATUALIZAR OPÇÃO DA CAMPANHA
 const update = async (req, res) => {
-    const id = Number(req.params.id);
-    const validation = campanha_opcoes_schema_1.updateCampanhaOpcoesSchema.safeParse(req.body);
+    const validation = campanha_opcoes_schema_js_1.updateCampanhaOpcoesSchema.safeParse(req.body);
     if (!validation.success) {
         return res.status(400).json({
             mensagem: "Dados inválidos",
@@ -61,78 +29,43 @@ const update = async (req, res) => {
         });
     }
     try {
-        const campanhaOpcao = await prismaClient_1.default.campanhaOpcoes.update({
-            where: { id },
-            data: validation.data,
-        });
-        return res.status(200).json(campanhaOpcao);
+        const opcao = await campanha_opcoes_service_js_1.campanhaOpcoesService.update(Number(req.params.id), validation.data);
+        return res.status(200).json(opcao);
     }
     catch (error) {
-        // registro não encontrado
-        if (error.code === "P2025") {
-            return res.status(404).json({
-                mensagem: "Opção da campanha não encontrada",
-            });
-        }
-        // unique constraint
-        if (error.code === "P2002") {
-            return res.status(409).json({
-                mensagem: "Já existe uma opção com essa descrição nesta campanha",
-            });
-        }
-        return res.status(500).json({
-            mensagem: "Erro interno",
-        });
+        return res.status(400).json({ mensagem: error.message });
     }
 };
 exports.update = update;
-// LISTAR TODAS AS OPÇÕES
 const findAll = async (_req, res) => {
-    const campanhaOpcoes = await prismaClient_1.default.campanhaOpcoes.findMany({
-        include: {
-            campanha: true,
-        },
-    });
-    return res.status(200).json(campanhaOpcoes);
+    try {
+        const opcoes = await campanha_opcoes_service_js_1.campanhaOpcoesService.getAll();
+        return res.status(200).json(opcoes);
+    }
+    catch {
+        return res.status(500).json({ mensagem: "Erro interno" });
+    }
 };
 exports.findAll = findAll;
-// BUSCAR OPÇÃO POR ID
 const findById = async (req, res) => {
-    const id = Number(req.params.id);
-    const campanhaOpcao = await prismaClient_1.default.campanhaOpcoes.findUnique({
-        where: { id },
-        include: {
-            campanha: true,
-        },
-    });
-    if (!campanhaOpcao) {
-        return res.status(404).json({
-            mensagem: "Opção da campanha não encontrada",
-        });
+    try {
+        const opcao = await campanha_opcoes_service_js_1.campanhaOpcoesService.getById(Number(req.params.id));
+        return res.status(200).json(opcao);
     }
-    return res.status(200).json(campanhaOpcao);
+    catch (error) {
+        return res.status(404).json({ mensagem: error.message });
+    }
 };
 exports.findById = findById;
-// DELETAR OPÇÃO
 const remove = async (req, res) => {
-    const id = Number(req.params.id);
     try {
-        await prismaClient_1.default.campanhaOpcoes.delete({
-            where: { id },
-        });
+        await campanha_opcoes_service_js_1.campanhaOpcoesService.delete(Number(req.params.id));
         return res.status(200).json({
             mensagem: "Opção removida com sucesso",
         });
     }
     catch (error) {
-        if (error.code === "P2025") {
-            return res.status(404).json({
-                mensagem: "Opção da campanha não encontrada",
-            });
-        }
-        return res.status(500).json({
-            mensagem: "Erro interno",
-        });
+        return res.status(404).json({ mensagem: error.message });
     }
 };
 exports.remove = remove;
