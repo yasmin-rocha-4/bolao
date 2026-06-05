@@ -1,61 +1,60 @@
 import type { Request, Response } from "express";
-import prisma from "../../prisma/prismaClient";
-import { createCampanhaSchema, updateCampanhaSchema } from "./campanha.schema";
+import { campanhaRepository } from "./campanha.repo.js";
+import {
+  createCampanhaSchema,
+  updateCampanhaSchema,
+} from "./campanha.schema.js";
+
 // CRIAR CAMPANHA
 export const create = async (req: Request, res: Response) => {
-
-
   const validation = createCampanhaSchema.safeParse(req.body);
 
-  console.log("VALIDAÇÃO:", validation);
-
   if (!validation.success) {
-
     return res.status(400).json({
       mensagem: "Dados inválidos",
-      erros: validation.error.format()
+      erros: validation.error.format(),
     });
   }
 
+  try {
+    const campanha = await campanhaRepository.create(validation.data);
 
-  const campanha = await prisma.campanha.create({
-    data: validation.data
-  });
-
-  return res.status(201).json(campanha);
+    return res.status(201).json(campanha);
+  } catch (error: any) {
+    return res.status(500).json({
+      mensagem: "Erro interno",
+    });
+  }
 };
+
 // ATUALIZAR CAMPANHA
 export const update = async (req: Request, res: Response) => {
   const id = Number(req.params.id);
 
-  // validação
   const validation = updateCampanhaSchema.safeParse(req.body);
 
   if (!validation.success) {
     return res.status(400).json({
       mensagem: "Dados inválidos",
-      erros: validation.error.format()
+      erros: validation.error.format(),
     });
   }
 
   try {
-    const campanha = await prisma.campanha.update({
-      where: { id },
-      data: validation.data
-    });
+    const campanhaExistente = await campanhaRepository.getById(id);
 
-    return res.status(200).json(campanha);
-
-  } catch (error: any) {
-
-    if (error.code === "P2025") {
+    if (!campanhaExistente) {
       return res.status(404).json({
-        mensagem: "Campanha não encontrada"
+        mensagem: "Campanha não encontrada",
       });
     }
 
+    const campanha = await campanhaRepository.update(id, validation.data);
+
+    return res.status(200).json(campanha);
+  } catch (error: any) {
     return res.status(500).json({
-      mensagem: "Erro interno"
+      mensagem: "Erro interno",
     });
   }
 };

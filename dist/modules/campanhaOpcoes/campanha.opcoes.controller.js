@@ -13,7 +13,7 @@ const create = async (req, res) => {
     if (!validation.success) {
         return res.status(400).json({
             mensagem: "Dados inválidos",
-            erros: validation.error.format()
+            erros: validation.error.format(),
         });
     }
     try {
@@ -24,10 +24,10 @@ const create = async (req, res) => {
                 eh_resultado_final: validation.data.eh_resultado_final ?? false,
                 campanha: {
                     connect: {
-                        id: Number(validation.data.campanha_id)
-                    }
-                }
-            }
+                        id: Number(validation.data.campanha_id),
+                    },
+                },
+            },
         });
         return res.status(201).json(campanhaOpcao);
     }
@@ -35,17 +35,17 @@ const create = async (req, res) => {
         // FK inválida
         if (error.code === "P2003") {
             return res.status(400).json({
-                mensagem: "Campanha inválida"
+                mensagem: "Campanha inválida",
             });
         }
         // UNIQUE (campanha_id + descricao)
         if (error.code === "P2002") {
             return res.status(409).json({
-                mensagem: "Já existe uma opção com essa descrição nesta campanha"
+                mensagem: "Já existe uma opção com essa descrição nesta campanha",
             });
         }
         return res.status(500).json({
-            mensagem: "Erro interno"
+            mensagem: "Erro interno",
         });
     }
 };
@@ -57,13 +57,13 @@ const update = async (req, res) => {
     if (!validation.success) {
         return res.status(400).json({
             mensagem: "Dados inválidos",
-            erros: validation.error.format()
+            erros: validation.error.format(),
         });
     }
     try {
         const campanhaOpcao = await prismaClient_1.default.campanhaOpcoes.update({
             where: { id },
-            data: validation.data
+            data: validation.data,
         });
         return res.status(200).json(campanhaOpcao);
     }
@@ -71,17 +71,17 @@ const update = async (req, res) => {
         // registro não encontrado
         if (error.code === "P2025") {
             return res.status(404).json({
-                mensagem: "Opção da campanha não encontrada"
+                mensagem: "Opção da campanha não encontrada",
             });
         }
         // unique constraint
         if (error.code === "P2002") {
             return res.status(409).json({
-                mensagem: "Já existe uma opção com essa descrição nesta campanha"
+                mensagem: "Já existe uma opção com essa descrição nesta campanha",
             });
         }
         return res.status(500).json({
-            mensagem: "Erro interno"
+            mensagem: "Erro interno",
         });
     }
 };
@@ -90,8 +90,8 @@ exports.update = update;
 const findAll = async (_req, res) => {
     const campanhaOpcoes = await prismaClient_1.default.campanhaOpcoes.findMany({
         include: {
-            campanha: true
-        }
+            campanha: true,
+        },
     });
     return res.status(200).json(campanhaOpcoes);
 };
@@ -102,12 +102,12 @@ const findById = async (req, res) => {
     const campanhaOpcao = await prismaClient_1.default.campanhaOpcoes.findUnique({
         where: { id },
         include: {
-            campanha: true
-        }
+            campanha: true,
+        },
     });
     if (!campanhaOpcao) {
         return res.status(404).json({
-            mensagem: "Opção da campanha não encontrada"
+            mensagem: "Opção da campanha não encontrada",
         });
     }
     return res.status(200).json(campanhaOpcao);
@@ -118,20 +118,20 @@ const remove = async (req, res) => {
     const id = Number(req.params.id);
     try {
         await prismaClient_1.default.campanhaOpcoes.delete({
-            where: { id }
+            where: { id },
         });
         return res.status(200).json({
-            mensagem: "Opção removida com sucesso"
+            mensagem: "Opção removida com sucesso",
         });
     }
     catch (error) {
         if (error.code === "P2025") {
             return res.status(404).json({
-                mensagem: "Opção da campanha não encontrada"
+                mensagem: "Opção da campanha não encontrada",
             });
         }
         return res.status(500).json({
-            mensagem: "Erro interno"
+            mensagem: "Erro interno",
         });
     }
 };

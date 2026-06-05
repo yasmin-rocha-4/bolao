@@ -43,9 +43,9 @@ router.get("/", usuario_controller_js_1.getAll);
 // BUSCAR POR ID
 router.get("/:id", usuario_controller_js_1.getById);
 // CRIAR
-router.post('/', (0, validate_1.validate)(usuarioSchema.createUsuarioSchema), usuario_controller_js_1.create);
+router.post("/", (0, validate_1.validate)(usuarioSchema.createUsuarioSchema), usuario_controller_js_1.create);
 // ATUALIZAR
-router.put('/:id', (0, validate_1.validate)(usuarioSchema.updateUsuarioSchema), usuario_controller_js_1.update);
+router.put("/:id", (0, validate_1.validate)(usuarioSchema.updateUsuarioSchema), usuario_controller_js_1.update);
 // DELETAR
 router.delete("/:id", usuario_controller_js_1.remove);
 exports.default = router;

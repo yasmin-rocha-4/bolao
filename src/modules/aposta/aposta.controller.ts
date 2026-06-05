@@ -1,10 +1,6 @@
 import type { Request, Response } from "express";
-import prisma from "../../prisma/prismaClient";
-
-import {
-  createApostaSchema,
-  updateApostaSchema
-} from "./aposta.schema";
+import { apostaRepository } from "./aposta.repo.js";
+import { createApostaSchema, updateApostaSchema } from "./aposta.schema.js";
 
 // CRIAR APOSTA
 export const create = async (req: Request, res: Response) => {
@@ -13,74 +9,57 @@ export const create = async (req: Request, res: Response) => {
   if (!validation.success) {
     return res.status(400).json({
       mensagem: "Dados inválidos",
-      erros: validation.error.format()
+      erros: validation.error.format(),
     });
   }
 
   try {
     const data = validation.data;
 
-    // Buscar opção + campanha
-    const opcao = await prisma.campanhaOpcoes.findUnique({
-      where: { id: data.campanha_opcao_id },
-      include: {
-        campanha: true
-      }
-    });
+    const opcao = await apostaRepository.getCampanhaOpcaoById(
+      data.campanha_opcao_id,
+    );
 
     if (!opcao) {
       return res.status(404).json({
-        mensagem: "Opção da campanha não encontrada"
+        mensagem: "Opção da campanha não encontrada",
       });
     }
 
     const campanha = opcao.campanha;
 
-    // REGRA 1: opção ativa
     if (opcao.status !== "ATIVA") {
       return res.status(400).json({
-        mensagem: "Essa opção está inativa"
+        mensagem: "Essa opção está inativa",
       });
     }
 
-    // REGRA 2: campanha pública
     if (!campanha.is_publica) {
       return res.status(403).json({
-        mensagem: "Esta campanha é privada"
+        mensagem: "Esta campanha é privada",
       });
     }
 
-    // REGRA 3: campanha dentro do período
     const now = new Date();
 
     if (now < campanha.data_inicio) {
       return res.status(400).json({
-        mensagem: "Campanha ainda não iniciou"
+        mensagem: "Campanha ainda não iniciou",
       });
     }
 
     if (now > campanha.data_fim) {
       return res.status(400).json({
-        mensagem: "Campanha já foi encerrada"
+        mensagem: "Campanha já foi encerrada",
       });
     }
 
-    // CRIAR APOSTA
-    const aposta = await prisma.aposta.create({
-      data: {
-        usuario_id: data.usuario_id,
-        campanha_opcao_id: data.campanha_opcao_id,
-        meio_pagamento: data.meio_pagamento,
-        status: data.status,
-        comprovante: data.comprovante
-      }
-    });
+    const aposta = await apostaRepository.create(data);
 
     return res.status(201).json(aposta);
-
   } catch (error: any) {
     return res.status(500).json({
-      mensagem: "Erro interno"
+      mensagem: "Erro interno",
     });
   }
 };
@@ -94,55 +73,41 @@ export const update = async (req: Request, res: Response) => {
   if (!validation.success) {
     return res.status(400).json({
       mensagem: "Dados inválidos",
-      erros: validation.error.format()
+      erros: validation.error.format(),
     });
   }
 
   try {
-    const apostaExistente = await prisma.aposta.findUnique({
-      where: { id },
-      include: {
-        campanhaOpcao: {
-          include: {
-            campanha: true
-          }
-        }
-      }
-    });
+    const apostaExistente = await apostaRepository.getById(id);
 
     if (!apostaExistente) {
       return res.status(404).json({
-        mensagem: "Aposta não encontrada"
+        mensagem: "Aposta não encontrada",
       });
     }
 
     const campanha = apostaExistente.campanhaOpcao.campanha;
 
-    // REGRA: não pode alterar aposta de campanha encerrada
     const now = new Date();
 
     if (now > campanha.data_fim) {
       return res.status(400).json({
-        mensagem: "Não é possível alterar aposta de uma campanha encerrada"
+        mensagem: "Não é possível alterar aposta de uma campanha encerrada",
       });
     }
 
-    const aposta = await prisma.aposta.update({
-      where: { id },
-      data: validation.data
-    });
+    const aposta = await apostaRepository.update(id, validation.data);
 
     return res.status(200).json(aposta);
-
   } catch (error: any) {
     if (error.code === "P2025") {
       return res.status(404).json({
-        mensagem: "Aposta não encontrada"
+        mensagem: "Aposta não encontrada",
       });
     }
 
     return res.status(500).json({
-      mensagem: "Erro interno"
+      mensagem: "Erro interno",
     });
   }
 };

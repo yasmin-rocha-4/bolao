@@ -7,7 +7,7 @@ import {
   update,
   remove,
 } from "./usuario.controller.js";
-import * as usuarioSchema from './usuario.schema'
+import * as usuarioSchema from "./usuario.schema";
 const router = Router();
 
 // LISTAR TODOS
@@ -18,11 +18,10 @@ router.get("/:id", getById);
 
 // CRIAR
 
-router.post('/', validate(usuarioSchema.createUsuarioSchema), create);
+router.post("/", validate(usuarioSchema.createUsuarioSchema), create);
 // ATUALIZAR
 
-router.put('/:id', validate(usuarioSchema.updateUsuarioSchema), update);
-
+router.put("/:id", validate(usuarioSchema.updateUsuarioSchema), update);
 
 // DELETAR
 router.delete("/:id", remove);

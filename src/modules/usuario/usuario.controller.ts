@@ -1,67 +1,103 @@
 import type { Request, Response } from "express";
-import prisma from "../../prisma/prismaClient";
-import { createUsuarioSchema } from "./usuario.schema";
+import { usuarioRepository } from "./usuario.repo.js";
+
+import { createUsuarioSchema, updateUsuarioSchema } from "./usuario.schema.js";
 
 // LISTAR TODOS
-export const getAll = async (req: Request, res: Response) => {
-  const usuarios = await prisma.usuario.findMany();
-  res.json(usuarios);
+export const getAll = async (_req: Request, res: Response) => {
+  try {
+    const usuarios = await usuarioRepository.getAll();
+
+    return res.status(200).json(usuarios);
+  } catch (error) {
+    return res.status(500).json({
+      error: "Erro ao buscar usuários",
+    });
+  }
 };
 
 // BUSCAR POR ID
 export const getById = async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
+  try {
+    const id = Number(req.params.id);
 
-  const usuario = await prisma.usuario.findUnique({
-    where: { id },
-  });
+    const usuario = await usuarioRepository.getById(id);
 
-  if (!usuario) {
-    return res.status(404).json({ error: "Usuário não encontrado" });
+    if (!usuario) {
+      return res.status(404).json({
+        error: "Usuário não encontrado",
+      });
+    }
+
+    return res.status(200).json(usuario);
+  } catch (error) {
+    return res.status(500).json({
+      error: "Erro ao buscar usuário",
+    });
   }
-
-  res.json(usuario);
 };
 
 // CRIAR USUÁRIO
 export const create = async (req: Request, res: Response) => {
-
-  console.log("🚨 ENTROU NO CREATE");
-
   const validation = createUsuarioSchema.safeParse(req.body);
 
-  console.log("VALIDAÇÃO:", validation);
-
   if (!validation.success) {
-    console.log("❌ BLOQUEOU NO ZOD");
-
     return res.status(400).json({
       mensagem: "Dados inválidos",
-      erros: validation.error.format()
+      erros: validation.error.format(),
     });
   }
 
-  console.log("✅ PASSOU NO ZOD");
+  try {
+    const usuario = await usuarioRepository.create(validation.data);
 
-  const usuario = await prisma.usuario.create({
-    data: validation.data
-  });
+    return res.status(201).json(usuario);
+  } catch (error: any) {
+    if (error.code === "P2002") {
+      return res.status(409).json({
+        mensagem: "CPF ou e-mail já cadastrado",
+      });
+    }
 
-  return res.status(201).json(usuario);
-};
-// ATUALIZAR USUÁRIO
-
-export const update = async (req: Request, res: Response): Promise<Response> => {
-    
-
-    const { id } = req.params;
-
-    const updatedUsuario = await prisma.usuario.update({
-        where: { id: Number(id) },
-        data: req.body
+    return res.status(500).json({
+      mensagem: "Erro interno",
     });
-    // Lógica para atualizar um usuário
-    return res.status(200).json({ obj: updatedUsuario, message: "Usuário atualizado com sucesso" });
+  }
+};
+
+// ATUALIZAR USUÁRIO
+export const update = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+
+  const validation = updateUsuarioSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    return res.status(400).json({
+      mensagem: "Dados inválidos",
+      erros: validation.error.format(),
+    });
+  }
+
+  try {
+    const usuarioExistente = await usuarioRepository.getById(id);
+
+    if (!usuarioExistente) {
+      return res.status(404).json({
+        mensagem: "Usuário não encontrado",
+      });
+    }
+
+    const usuario = await usuarioRepository.update(id, validation.data);
+
+    return res.status(200).json({
+      obj: usuario,
+      message: "Usuário atualizado com sucesso",
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      mensagem: "Erro interno",
+    });
+  }
 };
 
 // DELETAR USUÁRIO
@@ -69,12 +105,22 @@ export const remove = async (req: Request, res: Response) => {
   const id = Number(req.params.id);
 
   try {
-    await prisma.usuario.delete({
-      where: { id },
-    });
+    const usuarioExistente = await usuarioRepository.getById(id);
 
-    res.status(204).send();
+    if (!usuarioExistente) {
+      return res.status(404).json({
+        error: "Usuário não encontrado",
+      });
+    }
+
+    await usuarioRepository.delete(id);
+
+    return res.status(200).json({
+      mensagem: "Usuário removido com sucesso",
+    });
   } catch (error) {
-    return res.status(404).json({ error: "Usuário não encontrado" });
+    return res.status(500).json({
+      mensagem: "Erro interno",
+    });
   }
 };
