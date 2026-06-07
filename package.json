@@ -7,7 +7,11 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "prisma:studio": "prisma studio",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "keywords": [],
   "author": "",
@@ -24,10 +28,13 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
     "@types/node": "^25.9.1",
     "@types/pg": "^8.20.0",
     "@types/swagger-ui-express": "^4.1.8",
     "dotenv-cli": "^11.0.0",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.11",
     "ts-node-dev": "^2.0.0",
     "typescript": "^6.0.3"
   }
