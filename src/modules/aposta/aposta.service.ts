@@ -1,6 +1,10 @@
 import { apostaRepository } from "./aposta.repo.js";
 
 export const apostaService = {
+  getAll: async () => {
+    return await apostaRepository.getAll();
+  },
+
   getById: async (id: number) => {
     const aposta = await apostaRepository.getById(id);
 
@@ -44,21 +48,22 @@ export const apostaService = {
   },
 
   update: async (id: number, data: any) => {
-    const apostaExistente = await apostaRepository.getById(id);
+    const aposta = await apostaRepository.getById(id);
 
-    if (!apostaExistente) {
+    if (!aposta) {
       throw new Error("Aposta não encontrada");
     }
 
-    const campanha = apostaExistente.campanhaOpcao.campanha;
-    const now = new Date();
+    return await apostaRepository.update(id, data);
+  },
 
-    if (now > campanha.data_fim) {
-      throw new Error(
-        "Não é possível alterar aposta de uma campanha encerrada",
-      );
+  delete: async (id: number) => {
+    const aposta = await apostaRepository.getById(id);
+
+    if (!aposta) {
+      throw new Error("Aposta não encontrada");
     }
 
-    return await apostaRepository.update(id, data);
+    return await apostaRepository.delete(id);
   },
 };

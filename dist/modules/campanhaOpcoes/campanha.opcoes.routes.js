@@ -38,8 +38,9 @@ const validate_js_1 = require("../../utils/validate.js");
 const campanha_opcoes_controller_js_1 = require("./campanha.opcoes.controller.js");
 const campanhaOpcoesSchema = __importStar(require("./campanha.opcoes.schema.js"));
 const router = (0, express_1.Router)();
-// CRIAR
+router.get("/", campanha_opcoes_controller_js_1.findAll);
+router.get("/:id", campanha_opcoes_controller_js_1.findById);
 router.post("/", (0, validate_js_1.validate)(campanhaOpcoesSchema.createCampanhaOpcoesSchema), campanha_opcoes_controller_js_1.create);
-// ATUALIZAR
 router.put("/:id", (0, validate_js_1.validate)(campanhaOpcoesSchema.updateCampanhaOpcoesSchema), campanha_opcoes_controller_js_1.update);
+router.delete("/:id", campanha_opcoes_controller_js_1.remove);
 exports.default = router;

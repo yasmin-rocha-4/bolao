@@ -1,8 +1,28 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.update = exports.create = void 0;
+exports.remove = exports.update = exports.create = exports.getById = exports.getAll = void 0;
 const campanha_service_js_1 = require("./campanha.service.js");
 const campanha_schema_js_1 = require("./campanha.schema.js");
+const getAll = async (_req, res) => {
+    try {
+        const campanhas = await campanha_service_js_1.campanhaService.getAll();
+        return res.status(200).json(campanhas);
+    }
+    catch {
+        return res.status(500).json({ mensagem: "Erro ao buscar campanhas" });
+    }
+};
+exports.getAll = getAll;
+const getById = async (req, res) => {
+    try {
+        const campanha = await campanha_service_js_1.campanhaService.getById(Number(req.params.id));
+        return res.status(200).json(campanha);
+    }
+    catch (error) {
+        return res.status(404).json({ mensagem: error.message });
+    }
+};
+exports.getById = getById;
 const create = async (req, res) => {
     const validation = campanha_schema_js_1.createCampanhaSchema.safeParse(req.body);
     if (!validation.success) {
@@ -37,3 +57,15 @@ const update = async (req, res) => {
     }
 };
 exports.update = update;
+const remove = async (req, res) => {
+    try {
+        await campanha_service_js_1.campanhaService.delete(Number(req.params.id));
+        return res.status(200).json({
+            mensagem: "Campanha removida com sucesso",
+        });
+    }
+    catch (error) {
+        return res.status(404).json({ mensagem: error.message });
+    }
+};
+exports.remove = remove;

@@ -30,14 +30,6 @@ export const campanhaService = {
       throw new Error("Campanha não encontrada");
     }
 
-    if (
-      data.data_inicio &&
-      data.data_fim &&
-      data.data_inicio >= data.data_fim
-    ) {
-      throw new Error("A data de início deve ser anterior à data de fim");
-    }
-
     return await campanhaRepository.update(id, data);
   },
 

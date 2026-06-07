@@ -1,20 +1,21 @@
 import { Router } from "express";
-import { validate } from "../../utils/validate";
+import { validate } from "../../utils/validate.js";
 import {
+  getAll,
+  getById,
   create,
   update,
-} from "./aposta.controller";
-import * as campanhaSchema from './aposta.schema'
+  remove,
+} from "./aposta.controller.js";
+
+import * as apostaSchema from "./aposta.schema.js";
+
 const router = Router();
 
-
-// CRIAR
-
-router.post('/', validate(campanhaSchema.createApostaSchema), create);
-// ATUALIZAR
-
-router.put('/:id', validate(campanhaSchema.updateApostaSchema), update);
-
-
+router.get("/", getAll);
+router.get("/:id", getById);
+router.post("/", validate(apostaSchema.createApostaSchema), create);
+router.put("/:id", validate(apostaSchema.updateApostaSchema), update);
+router.delete("/:id", remove);
 
 export default router;

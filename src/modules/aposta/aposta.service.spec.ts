@@ -3,10 +3,12 @@ import { apostaRepository } from "./aposta.repo";
 
 jest.mock("./aposta.repo", () => ({
   apostaRepository: {
+    getAll: jest.fn(),
     getById: jest.fn(),
     getCampanhaOpcaoById: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
+    delete: jest.fn(),
   },
 }));
 
@@ -106,5 +108,105 @@ describe("apostaService", () => {
     );
 
     expect(apostaRepository.create).not.toHaveBeenCalled();
+  });
+  it("deve listar apostas", async () => {
+    const apostas = [{ id: 1, status: "PENDENTE", meio_pagamento: "PIX" }];
+
+    (apostaRepository.getAll as jest.Mock).mockResolvedValue(apostas);
+
+    const resultado = await apostaService.getAll();
+
+    expect(resultado).toEqual(apostas);
+    expect(apostaRepository.getAll).toHaveBeenCalledTimes(1);
+  });
+
+  it("deve buscar aposta por ID existente", async () => {
+    const aposta = {
+      id: 1,
+      status: "PENDENTE",
+      campanhaOpcao: {
+        campanha: {
+          data_fim: new Date("2026-12-31"),
+        },
+      },
+    };
+
+    (apostaRepository.getById as jest.Mock).mockResolvedValue(aposta);
+
+    const resultado = await apostaService.getById(1);
+
+    expect(resultado).toEqual(aposta);
+    expect(apostaRepository.getById).toHaveBeenCalledWith(1);
+  });
+
+  it("deve retornar erro ao buscar aposta inexistente", async () => {
+    (apostaRepository.getById as jest.Mock).mockResolvedValue(null);
+
+    await expect(apostaService.getById(99)).rejects.toThrow(
+      "Aposta não encontrada",
+    );
+  });
+
+  it("deve atualizar aposta existente", async () => {
+    const apostaExistente = {
+      id: 1,
+      status: "PENDENTE",
+      campanhaOpcao: {
+        campanha: {
+          data_fim: new Date("2026-12-31"),
+        },
+      },
+    };
+
+    const dados = { status: "CONFIRMADA" };
+    const apostaAtualizada = { ...apostaExistente, ...dados };
+
+    (apostaRepository.getById as jest.Mock).mockResolvedValue(apostaExistente);
+    (apostaRepository.update as jest.Mock).mockResolvedValue(apostaAtualizada);
+
+    const resultado = await apostaService.update(1, dados);
+
+    expect(resultado).toEqual(apostaAtualizada);
+    expect(apostaRepository.update).toHaveBeenCalledWith(1, dados);
+  });
+
+  it("não deve atualizar aposta inexistente", async () => {
+    (apostaRepository.getById as jest.Mock).mockResolvedValue(null);
+
+    await expect(
+      apostaService.update(99, { status: "CONFIRMADA" }),
+    ).rejects.toThrow("Aposta não encontrada");
+
+    expect(apostaRepository.update).not.toHaveBeenCalled();
+  });
+
+  it("deve remover aposta existente", async () => {
+    const aposta = {
+      id: 1,
+      status: "PENDENTE",
+      campanhaOpcao: {
+        campanha: {
+          data_fim: new Date("2026-12-31"),
+        },
+      },
+    };
+
+    (apostaRepository.getById as jest.Mock).mockResolvedValue(aposta);
+    (apostaRepository.delete as jest.Mock).mockResolvedValue(aposta);
+
+    const resultado = await apostaService.delete(1);
+
+    expect(resultado).toEqual(aposta);
+    expect(apostaRepository.delete).toHaveBeenCalledWith(1);
+  });
+
+  it("não deve remover aposta inexistente", async () => {
+    (apostaRepository.getById as jest.Mock).mockResolvedValue(null);
+
+    await expect(apostaService.delete(99)).rejects.toThrow(
+      "Aposta não encontrada",
+    );
+
+    expect(apostaRepository.delete).not.toHaveBeenCalled();
   });
 });

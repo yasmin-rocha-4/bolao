@@ -34,12 +34,13 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const validate_1 = require("../../utils/validate");
-const aposta_controller_1 = require("./aposta.controller");
-const campanhaSchema = __importStar(require("./aposta.schema"));
+const validate_js_1 = require("../../utils/validate.js");
+const aposta_controller_js_1 = require("./aposta.controller.js");
+const apostaSchema = __importStar(require("./aposta.schema.js"));
 const router = (0, express_1.Router)();
-// CRIAR
-router.post('/', (0, validate_1.validate)(campanhaSchema.createApostaSchema), aposta_controller_1.create);
-// ATUALIZAR
-router.put('/:id', (0, validate_1.validate)(campanhaSchema.updateApostaSchema), aposta_controller_1.update);
+router.get("/", aposta_controller_js_1.getAll);
+router.get("/:id", aposta_controller_js_1.getById);
+router.post("/", (0, validate_js_1.validate)(apostaSchema.createApostaSchema), aposta_controller_js_1.create);
+router.put("/:id", (0, validate_js_1.validate)(apostaSchema.updateApostaSchema), aposta_controller_js_1.update);
+router.delete("/:id", aposta_controller_js_1.remove);
 exports.default = router;

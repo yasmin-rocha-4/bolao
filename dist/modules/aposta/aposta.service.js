@@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.apostaService = void 0;
 const aposta_repo_js_1 = require("./aposta.repo.js");
 exports.apostaService = {
+    getAll: async () => {
+        return await aposta_repo_js_1.apostaRepository.getAll();
+    },
     getById: async (id) => {
         const aposta = await aposta_repo_js_1.apostaRepository.getById(id);
         if (!aposta) {
@@ -32,15 +35,17 @@ exports.apostaService = {
         return await aposta_repo_js_1.apostaRepository.create(data);
     },
     update: async (id, data) => {
-        const apostaExistente = await aposta_repo_js_1.apostaRepository.getById(id);
-        if (!apostaExistente) {
+        const aposta = await aposta_repo_js_1.apostaRepository.getById(id);
+        if (!aposta) {
             throw new Error("Aposta não encontrada");
         }
-        const campanha = apostaExistente.campanhaOpcao.campanha;
-        const now = new Date();
-        if (now > campanha.data_fim) {
-            throw new Error("Não é possível alterar aposta de uma campanha encerrada");
-        }
         return await aposta_repo_js_1.apostaRepository.update(id, data);
+    },
+    delete: async (id) => {
+        const aposta = await aposta_repo_js_1.apostaRepository.getById(id);
+        if (!aposta) {
+            throw new Error("Aposta não encontrada");
+        }
+        return await aposta_repo_js_1.apostaRepository.delete(id);
     },
 };
