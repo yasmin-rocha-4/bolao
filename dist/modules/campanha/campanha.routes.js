@@ -35,11 +35,12 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const validate_1 = require("../../utils/validate");
-const campanha_controller_js_1 = require("./campanha.controller.js");
+const campanha_controller_1 = require("./campanha.controller");
 const campanhaSchema = __importStar(require("./campanha.schema"));
 const router = (0, express_1.Router)();
-// CRIAR
-router.post('/', (0, validate_1.validate)(campanhaSchema.createCampanhaSchema), campanha_controller_js_1.create);
-// ATUALIZAR
-router.put('/:id', (0, validate_1.validate)(campanhaSchema.updateCampanhaSchema), campanha_controller_js_1.update);
+router.get("/", campanha_controller_1.getAll);
+router.get("/:id", campanha_controller_1.getById);
+router.post("/", (0, validate_1.validate)(campanhaSchema.createCampanhaSchema), campanha_controller_1.create);
+router.put("/:id", (0, validate_1.validate)(campanhaSchema.updateCampanhaSchema), campanha_controller_1.update);
+router.delete("/:id", campanha_controller_1.remove);
 exports.default = router;

@@ -18,7 +18,12 @@ exports.usuarioService = {
         if (usuarioExistente) {
             throw new Error("E-mail já cadastrado");
         }
-        return await usuario_repo_js_1.usuarioRepository.create(data);
+        const dadosUsuario = {
+            ...data,
+            tipo_usuario: "cliente",
+            status: "ativo",
+        };
+        return await usuario_repo_js_1.usuarioRepository.create(dadosUsuario);
     },
     update: async (id, data) => {
         const usuario = await usuario_repo_js_1.usuarioRepository.getById(id);

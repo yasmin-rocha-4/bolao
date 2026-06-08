@@ -8,8 +8,11 @@ import campanhaOpcoesRoutes from "./modules/campanhaOpcoes/campanha.opcoes.route
 import apostaRoutes from "./modules/aposta/aposta.routes.js";
 
 import { openApiDocument } from "./utils/openapi.js";
+import cors from "cors";
 
 const app = express();
+
+app.use(cors());
 
 app.use(express.json());
 

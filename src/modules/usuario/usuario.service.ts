@@ -22,7 +22,13 @@ export const usuarioService = {
       throw new Error("E-mail já cadastrado");
     }
 
-    return await usuarioRepository.create(data);
+    const dadosUsuario = {
+      ...data,
+      tipo_usuario: "cliente",
+      status: "ativo",
+    };
+
+    return await usuarioRepository.create(dadosUsuario);
   },
 
   update: async (id: number, data: any) => {

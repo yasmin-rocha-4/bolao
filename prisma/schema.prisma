@@ -29,7 +29,7 @@ model Campanha {
   tx_operacional Decimal @db.Decimal(10, 2)
   valor_bolao Decimal @db.Decimal(10, 2)
   is_publica Boolean
-  codigo_campanha String
+  codigo_campanha String @unique
   status String
   opcoes CampanhaOpcoes[]
 }

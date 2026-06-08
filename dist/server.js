@@ -44,7 +44,9 @@ const campanha_routes_js_1 = __importDefault(require("./modules/campanha/campanh
 const campanha_opcoes_routes_js_1 = __importDefault(require("./modules/campanhaOpcoes/campanha.opcoes.routes.js"));
 const aposta_routes_js_1 = __importDefault(require("./modules/aposta/aposta.routes.js"));
 const openapi_js_1 = require("./utils/openapi.js");
+const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
+app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use("/usuarios", usuario_routes_js_1.default);
 app.use("/campanhas", campanha_routes_js_1.default);
