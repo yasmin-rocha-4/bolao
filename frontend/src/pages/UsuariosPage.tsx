@@ -25,7 +25,7 @@ export default function UsuariosPage() {
       <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-green-700 via-yellow-400 to-blue-700 p-8 text-white shadow-xl">
         <div className="max-w-3xl">
           <p className="text-sm font-bold uppercase tracking-widest text-white/90">
-            Festa dos Campeões 🇧🇷
+            Festa dos Campeões 
           </p>
 
           <h2 className="mt-3 text-4xl font-black">
@@ -91,7 +91,7 @@ export default function UsuariosPage() {
             </div>
 
             <div className="mt-5 rounded-2xl bg-gradient-to-r from-green-600 to-blue-700 px-4 py-3 text-center font-bold text-white">
-              Parabéns! Você acertou o resultado 🇧🇷
+              Parabéns! Você acertou o resultado 
             </div>
           </div>
         ))}
