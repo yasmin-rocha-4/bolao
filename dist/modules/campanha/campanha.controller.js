@@ -3,9 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.remove = exports.update = exports.create = exports.getById = exports.getAll = void 0;
 const campanha_service_js_1 = require("./campanha.service.js");
 const campanha_schema_js_1 = require("./campanha.schema.js");
-const getAll = async (_req, res) => {
+const getAll = async (req, res) => {
     try {
-        const campanhas = await campanha_service_js_1.campanhaService.getAll();
+        const campanhas = await campanha_service_js_1.campanhaService.getAll(req.usuario);
         return res.status(200).json(campanhas);
     }
     catch {
@@ -15,7 +15,7 @@ const getAll = async (_req, res) => {
 exports.getAll = getAll;
 const getById = async (req, res) => {
     try {
-        const campanha = await campanha_service_js_1.campanhaService.getById(Number(req.params.id));
+        const campanha = await campanha_service_js_1.campanhaService.getById(Number(req.params.id), req.usuario);
         return res.status(200).json(campanha);
     }
     catch (error) {
@@ -32,7 +32,7 @@ const create = async (req, res) => {
         });
     }
     try {
-        const campanha = await campanha_service_js_1.campanhaService.create(validation.data);
+        const campanha = await campanha_service_js_1.campanhaService.create(validation.data, req.usuario);
         return res.status(201).json(campanha);
     }
     catch (error) {
@@ -49,7 +49,7 @@ const update = async (req, res) => {
         });
     }
     try {
-        const campanha = await campanha_service_js_1.campanhaService.update(Number(req.params.id), validation.data);
+        const campanha = await campanha_service_js_1.campanhaService.update(Number(req.params.id), validation.data, req.usuario);
         return res.status(200).json(campanha);
     }
     catch (error) {
@@ -59,7 +59,7 @@ const update = async (req, res) => {
 exports.update = update;
 const remove = async (req, res) => {
     try {
-        await campanha_service_js_1.campanhaService.delete(Number(req.params.id));
+        await campanha_service_js_1.campanhaService.delete(Number(req.params.id), req.usuario);
         return res.status(200).json({
             mensagem: "Campanha removida com sucesso",
         });

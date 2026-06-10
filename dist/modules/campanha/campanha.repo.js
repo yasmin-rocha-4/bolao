@@ -6,8 +6,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.campanhaRepository = void 0;
 const prismaClient_1 = __importDefault(require("../../prisma/prismaClient"));
 exports.campanhaRepository = {
-    getAll: () => {
+    getAllByCriador: (criadorId) => {
         return prismaClient_1.default.campanha.findMany({
+            where: {
+                criador_id: criadorId,
+            },
+            include: {
+                opcoes: true,
+            },
+        });
+    },
+    getAllPublicas: () => {
+        return prismaClient_1.default.campanha.findMany({
+            where: {
+                is_publica: true,
+                status: "ATIVA",
+            },
             include: {
                 opcoes: true,
             },

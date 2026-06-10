@@ -1,8 +1,8 @@
 import { z } from "zod";
-import {
-  extendZodWithOpenApi,
-  OpenAPIRegistry,
-} from "@asteasolutions/zod-to-openapi";
+import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
+
+extendZodWithOpenApi(z);
+
 export const createUsuarioSchema = z.object({
   nome: z.string().min(3, "o nome deve ter no minimo 3 caracteres"),
   email: z.email("O email deve ser válido"),
@@ -12,10 +12,10 @@ export const createUsuarioSchema = z.object({
     .string()
     .min(11, "O telefone deve ter no minimo 11 caracteres incluindo o ddd")
     .optional(),
+
   tipo_usuario: z
-    .string()
-    .min(6, "O tipo de usuario deve ter no minimo 6 caracteres"),
-  status: z.string().min(5, "O status deve ter no minimo 5 caracteres"),
+    .enum(["cliente", "administrador"])
+    .default("cliente"),
 });
 
 export const updateUsuarioSchema = z.object({
@@ -34,4 +34,3 @@ export const updateUsuarioSchema = z.object({
     .min(5, "O status deve ter no minimo 5 caracteres")
     .optional(),
 });
-extendZodWithOpenApi(z);

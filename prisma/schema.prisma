@@ -19,8 +19,11 @@ model Usuario {
   tipo_usuario String
   senha String
   status String
+
   apostas Aposta[]
+  campanhasCriadas Campanha[]
 }
+
 model Campanha {
   id Int @id @default(autoincrement())
   nome String
@@ -31,9 +34,12 @@ model Campanha {
   is_publica Boolean
   codigo_campanha String @unique
   status String
+
+  criador_id Int
+  criador Usuario @relation(fields: [criador_id], references: [id])
+
   opcoes CampanhaOpcoes[]
 }
-
 model CampanhaOpcoes {
   id Int @id @default(autoincrement())
 

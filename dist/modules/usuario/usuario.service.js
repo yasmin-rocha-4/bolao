@@ -1,7 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.usuarioService = void 0;
 const usuario_repo_js_1 = require("./usuario.repo.js");
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 exports.usuarioService = {
     getAll: async () => {
         return await usuario_repo_js_1.usuarioRepository.getAll();
@@ -18,9 +22,11 @@ exports.usuarioService = {
         if (usuarioExistente) {
             throw new Error("E-mail já cadastrado");
         }
+        const senhaCriptografada = await bcryptjs_1.default.hash(data.senha, 10);
         const dadosUsuario = {
             ...data,
-            tipo_usuario: "cliente",
+            senha: senhaCriptografada,
+            tipo_usuario: data.tipo_usuario || "cliente",
             status: "ativo",
         };
         return await usuario_repo_js_1.usuarioRepository.create(dadosUsuario);
@@ -35,6 +41,9 @@ exports.usuarioService = {
             if (usuarioComEmail && usuarioComEmail.id !== id) {
                 throw new Error("E-mail já utilizado por outro usuário");
             }
+        }
+        if (data.senha) {
+            data.senha = await bcryptjs_1.default.hash(data.senha, 10);
         }
         return await usuario_repo_js_1.usuarioRepository.update(id, data);
     },

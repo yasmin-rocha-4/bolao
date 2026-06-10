@@ -87,7 +87,22 @@ describe("usuarioService", () => {
     expect(usuarioRepository.getByEmail).toHaveBeenCalledWith(
       novoUsuario.email,
     );
-    expect(usuarioRepository.create).toHaveBeenCalledWith(novoUsuario);
+    expect(usuarioRepository.create).toHaveBeenCalledWith(
+  expect.objectContaining({
+    nome: novoUsuario.nome,
+    email: novoUsuario.email,
+    cpf: novoUsuario.cpf,
+    telefone: novoUsuario.telefone,
+    tipo_usuario: "cliente",
+    status: "ativo",
+  }),
+);
+
+expect(usuarioRepository.create).toHaveBeenCalledWith(
+  expect.objectContaining({
+    senha: expect.stringMatching(/^\$2[aby]\$/),
+  }),
+);
   });
 
   it("não deve criar usuário com e-mail já cadastrado", async () => {

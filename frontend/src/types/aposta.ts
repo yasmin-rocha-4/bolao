@@ -13,18 +13,18 @@ export interface Aposta {
     email: string;
   };
 
-  campanhaOpcao?: {
+campanhaOpcao?: {
+  id: number;
+  descricao: string;
+  eh_resultado_final?: boolean;
+  campanha?: {
     id: number;
-    descricao: string;
-    campanha?: {
-      id: number;
-      nome: string;
-    };
+    nome: string;
   };
+};
 }
 
 export interface ApostaForm {
-  usuario_id: number;
   campanha_opcao_id: number;
   meio_pagamento: string;
   status: string;

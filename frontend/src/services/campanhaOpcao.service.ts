@@ -1,5 +1,8 @@
 import { api } from "./api";
-import type { CampanhaOpcao, CampanhaOpcaoForm } from "../types/campanhaOpcao";
+import type {
+  CampanhaOpcao,
+  CampanhaOpcaoForm,
+} from "../types/campanhaOpcao";
 
 export const campanhaOpcaoService = {
   getAll: async () => {

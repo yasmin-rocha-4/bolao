@@ -1,4 +1,5 @@
 import { usuarioRepository } from "./usuario.repo.js";
+import bcrypt from "bcryptjs";
 
 export const usuarioService = {
   getAll: async () => {
@@ -22,9 +23,12 @@ export const usuarioService = {
       throw new Error("E-mail já cadastrado");
     }
 
+    const senhaCriptografada = await bcrypt.hash(data.senha, 10);
+
     const dadosUsuario = {
       ...data,
-      tipo_usuario: "cliente",
+      senha: senhaCriptografada,
+      tipo_usuario: data.tipo_usuario || "cliente",
       status: "ativo",
     };
 
@@ -44,6 +48,10 @@ export const usuarioService = {
       if (usuarioComEmail && usuarioComEmail.id !== id) {
         throw new Error("E-mail já utilizado por outro usuário");
       }
+    }
+
+    if (data.senha) {
+      data.senha = await bcrypt.hash(data.senha, 10);
     }
 
     return await usuarioRepository.update(id, data);

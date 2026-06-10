@@ -60,10 +60,17 @@ export default function CampanhaOpcoesPage() {
     setForm(formInicial);
   }
 
-  async function remover(id: number) {
+async function remover(id: number) {
+  try {
     await campanhaOpcaoService.delete(id);
-    carregarDados();
+    await carregarDados();
+  } catch (error: any) {
+    alert(
+      error?.response?.data?.mensagem ||
+        "Erro ao excluir opção da campanha",
+    );
   }
+}
 
   function nomeCampanha(id: number) {
     return (

@@ -1,13 +1,33 @@
 import prisma from "../../prisma/prismaClient";
 
 export const campanhaOpcoesRepository = {
-  getAll: () => {
-    return prisma.campanhaOpcoes.findMany({
-      include: {
-        campanha: true,
+getAllByAdmin: (adminId: number) => {
+  return prisma.campanhaOpcoes.findMany({
+    where: {
+      campanha: {
+        criador_id: adminId,
       },
-    });
-  },
+    },
+    include: {
+      campanha: true,
+    },
+  });
+},
+
+getAllPublicas: () => {
+  return prisma.campanhaOpcoes.findMany({
+    where: {
+      status: "ATIVA",
+      campanha: {
+        is_publica: true,
+        status: "ATIVA",
+      },
+    },
+    include: {
+      campanha: true,
+    },
+  });
+},
 
   getById: (id: number) => {
     return prisma.campanhaOpcoes.findUnique({

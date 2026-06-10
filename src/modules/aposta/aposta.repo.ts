@@ -1,8 +1,31 @@
 import prisma from "../../prisma/prismaClient";
 
 export const apostaRepository = {
-  getAll: () => {
+  getAllByUsuario: (usuarioId: number) => {
     return prisma.aposta.findMany({
+      where: {
+        usuario_id: usuarioId,
+      },
+      include: {
+        usuario: true,
+        campanhaOpcao: {
+          include: {
+            campanha: true,
+          },
+        },
+      },
+    });
+  },
+
+  getAllByAdmin: (adminId: number) => {
+    return prisma.aposta.findMany({
+      where: {
+        campanhaOpcao: {
+          campanha: {
+            criador_id: adminId,
+          },
+        },
+      },
       include: {
         usuario: true,
         campanhaOpcao: {
@@ -36,6 +59,23 @@ export const apostaRepository = {
       },
     });
   },
+  getAllVencedores: () => {
+  return prisma.aposta.findMany({
+    where: {
+      campanhaOpcao: {
+        eh_resultado_final: true,
+      },
+    },
+    include: {
+      usuario: true,
+      campanhaOpcao: {
+        include: {
+          campanha: true,
+        },
+      },
+    },
+  });
+},
 
   create: (data: any) => {
     return prisma.aposta.create({

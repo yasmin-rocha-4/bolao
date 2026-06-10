@@ -7,6 +7,16 @@ export const apostaService = {
     return response.data;
   },
 
+  getAllVencedores: async () => {
+    const response = await api.get<Aposta[]>("/apostas/vencedores");
+    return response.data;
+  },
+
+  getById: async (id: number) => {
+    const response = await api.get<Aposta>(`/apostas/${id}`);
+    return response.data;
+  },
+
   create: async (data: ApostaForm) => {
     const response = await api.post("/apostas", data);
     return response.data;

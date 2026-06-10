@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.remove = exports.update = exports.create = exports.getById = exports.getAll = void 0;
+exports.getAllVencedores = exports.remove = exports.update = exports.create = exports.getById = exports.getAll = void 0;
 const aposta_service_js_1 = require("./aposta.service.js");
 const aposta_schema_js_1 = require("./aposta.schema.js");
-const getAll = async (_req, res) => {
+const getAll = async (req, res) => {
     try {
-        const apostas = await aposta_service_js_1.apostaService.getAll();
+        const apostas = await aposta_service_js_1.apostaService.getAll(req.usuario);
         return res.status(200).json(apostas);
     }
     catch {
@@ -15,7 +15,7 @@ const getAll = async (_req, res) => {
 exports.getAll = getAll;
 const getById = async (req, res) => {
     try {
-        const aposta = await aposta_service_js_1.apostaService.getById(Number(req.params.id));
+        const aposta = await aposta_service_js_1.apostaService.getById(Number(req.params.id), req.usuario);
         return res.status(200).json(aposta);
     }
     catch (error) {
@@ -32,7 +32,7 @@ const create = async (req, res) => {
         });
     }
     try {
-        const aposta = await aposta_service_js_1.apostaService.create(validation.data);
+        const aposta = await aposta_service_js_1.apostaService.create(validation.data, req.usuario);
         return res.status(201).json(aposta);
     }
     catch (error) {
@@ -49,7 +49,7 @@ const update = async (req, res) => {
         });
     }
     try {
-        const aposta = await aposta_service_js_1.apostaService.update(Number(req.params.id), validation.data);
+        const aposta = await aposta_service_js_1.apostaService.update(Number(req.params.id), validation.data, req.usuario);
         return res.status(200).json(aposta);
     }
     catch (error) {
@@ -59,7 +59,7 @@ const update = async (req, res) => {
 exports.update = update;
 const remove = async (req, res) => {
     try {
-        await aposta_service_js_1.apostaService.delete(Number(req.params.id));
+        await aposta_service_js_1.apostaService.delete(Number(req.params.id), req.usuario);
         return res.status(200).json({
             mensagem: "Aposta removida com sucesso",
         });
@@ -69,3 +69,13 @@ const remove = async (req, res) => {
     }
 };
 exports.remove = remove;
+const getAllVencedores = async (_req, res) => {
+    try {
+        const vencedores = await aposta_service_js_1.apostaService.getAllVencedores();
+        return res.status(200).json(vencedores);
+    }
+    catch {
+        return res.status(500).json({ mensagem: "Erro ao buscar vencedores" });
+    }
+};
+exports.getAllVencedores = getAllVencedores;

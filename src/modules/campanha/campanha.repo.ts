@@ -1,8 +1,23 @@
 import prisma from "../../prisma/prismaClient";
 
 export const campanhaRepository = {
-  getAll: () => {
+  getAllByCriador: (criadorId: number) => {
     return prisma.campanha.findMany({
+      where: {
+        criador_id: criadorId,
+      },
+      include: {
+        opcoes: true,
+      },
+    });
+  },
+
+  getAllPublicas: () => {
+    return prisma.campanha.findMany({
+      where: {
+        is_publica: true,
+        status: "ATIVA",
+      },
       include: {
         opcoes: true,
       },

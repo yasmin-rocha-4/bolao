@@ -1,238 +1,101 @@
 import { useEffect, useState } from "react";
-import { usuarioService } from "../services/usuario.service";
-import type { Usuario } from "../types/usuario";
-
-type UsuarioForm = Omit<Usuario, "id">;
-
-const formInicial: UsuarioForm = {
-  nome: "",
-  cpf: "",
-  email: "",
-  telefone: "",
-  tipo_usuario: "cliente",
-  senha: "",
-  status: "ativo",
-};
+import { apostaService } from "../services/aposta.service";
+import type { Aposta } from "../types/aposta";
 
 export default function UsuariosPage() {
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-  const [form, setForm] = useState<UsuarioForm>(formInicial);
-  const [editandoId, setEditandoId] = useState<number | null>(null);
+  const [vencedores, setVencedores] = useState<Aposta[]>([]);
 
-  async function carregarUsuarios() {
-    const data = await usuarioService.getAll();
-    setUsuarios(data);
-  }
+  async function carregarVencedores() {
+    const apostas = await apostaService.getAllVencedores();
 
-  async function salvar(e: React.FormEvent) {
-    e.preventDefault();
+    const apostasVencedoras = apostas.filter(
+      (aposta: Aposta) =>
+        aposta.campanhaOpcao?.eh_resultado_final === true,
+    );
 
-    try {
-      if (editandoId) {
-        await usuarioService.update(editandoId, form);
-      } else {
-        await usuarioService.create(form);
-      }
-
-      setForm(formInicial);
-      setEditandoId(null);
-      await carregarUsuarios();
-    } catch (error: any) {
-      alert(error?.response?.data?.mensagem || "Erro ao salvar usuário");
-    }
-  }
-
-  function editar(usuario: Usuario) {
-    setEditandoId(usuario.id);
-
-    setForm({
-      nome: usuario.nome,
-      cpf: usuario.cpf,
-      email: usuario.email,
-      telefone: usuario.telefone ?? "",
-      tipo_usuario: usuario.tipo_usuario,
-      senha: usuario.senha,
-      status: usuario.status,
-    });
-  }
-
-  function cancelarEdicao() {
-    setEditandoId(null);
-    setForm(formInicial);
-  }
-
-  async function remover(id: number) {
-    await usuarioService.delete(id);
-    await carregarUsuarios();
+    setVencedores(apostasVencedoras);
   }
 
   useEffect(() => {
-    carregarUsuarios();
+    carregarVencedores();
   }, []);
 
   return (
     <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold text-slate-900">Usuários</h2>
-        <p className="mt-2 text-slate-600">
-          Gerencie os participantes cadastrados no bolão.
-        </p>
-      </div>
+      <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-green-700 via-yellow-400 to-blue-700 p-8 text-white shadow-xl">
+        <div className="max-w-3xl">
+          <p className="text-sm font-bold uppercase tracking-widest text-white/90">
+            Festa dos Campeões 🇧🇷
+          </p>
 
-      <form
-        onSubmit={salvar}
-        className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-      >
-        <div className="grid gap-4 md:grid-cols-2">
-          <Campo label="Nome">
-            <input
-              className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              value={form.nome}
-              onChange={(e) => setForm({ ...form, nome: e.target.value })}
-            />
-          </Campo>
+          <h2 className="mt-3 text-4xl font-black">
+            Vencedores do Bolão
+          </h2>
 
-          <Campo label="CPF">
-            <input
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 disabled:bg-slate-100"
-              value={form.cpf}
-              disabled={!!editandoId}
-              onChange={(e) => setForm({ ...form, cpf: e.target.value })}
-            />
-          </Campo>
-
-          <Campo label="Email">
-            <input
-              type="email"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-            />
-          </Campo>
-
-          <Campo label="Telefone">
-            <input
-              className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              value={form.telefone}
-              onChange={(e) => setForm({ ...form, telefone: e.target.value })}
-            />
-          </Campo>
-
-          <Campo label="Senha">
-            <input
-              type="password"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              value={form.senha}
-              onChange={(e) => setForm({ ...form, senha: e.target.value })}
-            />
-          </Campo>
-
-          {editandoId && (
-            <Campo label="Status">
-              <select
-                className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value })}
-              >
-                <option value="ativo">Ativo</option>
-                <option value="inativo">Inativo</option>
-              </select>
-            </Campo>
-          )}
+          <p className="mt-3 text-lg font-medium text-white/90">
+            Aqui aparecem os participantes que apostaram na opção marcada como
+            resultado final.
+          </p>
         </div>
+      </section>
 
-        <div className="mt-6">
-          <button
-            type="submit"
-            className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+      {vencedores.length === 0 && (
+        <div className="rounded-3xl border border-yellow-200 bg-yellow-50 p-8 text-center shadow-sm">
+          <p className="text-5xl">🏆</p>
+
+          <h3 className="mt-4 text-2xl font-bold text-slate-900">
+            Ainda não há vencedores
+          </h3>
+
+          <p className="mt-2 text-slate-600">
+            Quando o administrador marcar uma opção como resultado final, os
+            apostadores dessa opção aparecerão aqui.
+          </p>
+        </div>
+      )}
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {vencedores.map((aposta) => (
+          <div
+            key={aposta.id}
+            className="relative overflow-hidden rounded-3xl border border-yellow-300 bg-white p-6 shadow-lg"
           >
-            {editandoId ? "Salvar Alterações" : "Criar Usuário"}
-          </button>
+            <div className="absolute right-4 top-4 text-4xl">🏆</div>
 
-          {editandoId && (
-            <button
-              type="button"
-              onClick={cancelarEdicao}
-              className="ml-2 rounded-lg border border-slate-300 px-4 py-2"
-            >
-              Cancelar
-            </button>
-          )}
-        </div>
-      </form>
+            <p className="text-sm font-bold uppercase tracking-wide text-green-700">
+              Vencedor confirmado
+            </p>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-full">
-          <thead className="bg-slate-100">
-            <tr>
-              <Th>ID</Th>
-              <Th>Nome</Th>
-              <Th>Email</Th>
-              <Th>CPF</Th>
-              <Th>Tipo</Th>
-              <Th>Status</Th>
-              <Th>Ações</Th>
-            </tr>
-          </thead>
+            <h3 className="mt-2 text-2xl font-black text-slate-900">
+              {aposta.usuario?.nome || "Participante"}
+            </h3>
 
-          <tbody>
-            {usuarios.map((usuario) => (
-              <tr key={usuario.id} className="border-t border-slate-200">
-                <Td>{usuario.id}</Td>
-                <Td>{usuario.nome}</Td>
-                <Td>{usuario.email}</Td>
-                <Td>{usuario.cpf}</Td>
-                <Td>{usuario.tipo_usuario}</Td>
-                <Td>{usuario.status}</Td>
-                <Td>
-                  <button
-                    onClick={() => editar(usuario)}
-                    className="mr-2 rounded bg-amber-500 px-3 py-1 text-white"
-                  >
-                    Editar
-                  </button>
+            <div className="mt-4 space-y-2 text-sm text-slate-700">
+              <p>
+                <strong>Campanha:</strong>{" "}
+                {aposta.campanhaOpcao?.campanha?.nome || "-"}
+              </p>
 
-                  <button
-                    onClick={() => remover(usuario.id)}
-                    className="rounded bg-red-600 px-3 py-1 text-white"
-                  >
-                    Excluir
-                  </button>
-                </Td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              <p>
+                <strong>Palpite vencedor:</strong>{" "}
+                {aposta.campanhaOpcao?.descricao || "-"}
+              </p>
+
+              <p>
+                <strong>Status da aposta:</strong> {aposta.status}
+              </p>
+
+              <p>
+                <strong>Pagamento:</strong> {aposta.meio_pagamento}
+              </p>
+            </div>
+
+            <div className="mt-5 rounded-2xl bg-gradient-to-r from-green-600 to-blue-700 px-4 py-3 text-center font-bold text-white">
+              Parabéns! Você acertou o resultado 🇧🇷
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
-}
-
-function Campo({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <label className="mb-1 block text-sm font-medium text-slate-700">
-        {label}
-      </label>
-      {children}
-    </div>
-  );
-}
-
-function Th({ children }: { children: React.ReactNode }) {
-  return (
-    <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-      {children}
-    </th>
-  );
-}
-
-function Td({ children }: { children: React.ReactNode }) {
-  return <td className="px-4 py-3 text-sm text-slate-700">{children}</td>;
 }
