@@ -217,7 +217,7 @@ function ClienteDashboard() {
       )}
 
       <div className="grid gap-6 md:grid-cols-2">
-        {campanhas.map((campanha) => {
+        {campanhas.map((campanha: Campanha) => {
           const opcoesCampanha = opcoesDaCampanha(campanha.id);
 
           return (
@@ -296,37 +296,6 @@ function ClienteDashboard() {
                       })
                     }
                   >
-                    <PagamentoForm
-                      tipo={pagamentos[campanha.id] || "PIX"}
-                      comprovante={comprovantes[campanha.id] || ""}
-                      boletoGerado={boletosGerados[campanha.id] || false}
-                      dadosCartao={
-                        dadosCartoes[campanha.id] || {
-                          numero: "",
-                          nome: "",
-                          validade: "",
-                          cvv: "",
-                        }
-                      }
-                      onComprovanteChange={(valor) =>
-                        setComprovantes({
-                          ...comprovantes,
-                          [campanha.id]: valor,
-                        })
-                      }
-                      onBoletoGeradoChange={(valor) =>
-                        setBoletosGerados({
-                          ...boletosGerados,
-                          [campanha.id]: valor,
-                        })
-                      }
-                      onDadosCartaoChange={(dados) =>
-                        setDadosCartoes({
-                          ...dadosCartoes,
-                          [campanha.id]: dados,
-                        })
-                      }
-                    />
                     <option value="PIX">PIX</option>
                     <option value="CARTAO_CREDITO">Cartão de Crédito</option>
                     <option value="CARTAO_DEBITO">Cartão de Débito</option>
@@ -334,6 +303,37 @@ function ClienteDashboard() {
                   </select>
                 </div>
 
+                <PagamentoForm
+                  tipo={pagamentos[campanha.id] || "PIX"}
+                  comprovante={comprovantes[campanha.id] || ""}
+                  boletoGerado={boletosGerados[campanha.id] || false}
+                  dadosCartao={
+                    dadosCartoes[campanha.id] || {
+                      numero: "",
+                      nome: "",
+                      validade: "",
+                      cvv: "",
+                    }
+                  }
+                  onComprovanteChange={(valor) =>
+                    setComprovantes({
+                      ...comprovantes,
+                      [campanha.id]: valor,
+                    })
+                  }
+                  onBoletoGeradoChange={(valor) =>
+                    setBoletosGerados({
+                      ...boletosGerados,
+                      [campanha.id]: valor,
+                    })
+                  }
+                  onDadosCartaoChange={(dados) =>
+                    setDadosCartoes({
+                      ...dadosCartoes,
+                      [campanha.id]: dados,
+                    })
+                  }
+                />
                 <button
                   onClick={() => apostar(campanha)}
                   disabled={
