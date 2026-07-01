@@ -1,31 +1,34 @@
 import { z } from "zod";
-import {
-  extendZodWithOpenApi,
-  OpenAPIRegistry,
-} from "@asteasolutions/zod-to-openapi";
+import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
+
+extendZodWithOpenApi(z);
+
 export const createCampanhaOpcoesSchema = z.object({
   campanha_id: z.coerce
     .number()
-    .int("O id da campanha deve ser um número inteiro")
-    .positive("O id da campanha deve ser maior que zero"),
+    .int()
+    .positive("Selecione uma campanha válida."),
 
-  descricao: z.string().min(3, "A descrição deve ter no minimo 3 caracteres"),
+  descricao: z
+    .string()
+    .trim()
+    .min(3, "A descrição deve possuir pelo menos 3 caracteres.")
+    .max(100, "A descrição deve possuir no máximo 100 caracteres."),
 
-  status: z.string().min(5, "O status deve ter no minimo 5 caracteres"),
+  status: z.enum(["ATIVA", "INATIVA"]),
 
-  eh_resultado_final: z.boolean().optional().default(false),
+  eh_resultado_final: z.boolean().default(false),
 });
 
 export const updateCampanhaOpcoesSchema = z.object({
   descricao: z
     .string()
-    .min(3, "A descrição deve ter no minimo 3 caracteres")
+    .trim()
+    .min(3, "A descrição deve possuir pelo menos 3 caracteres.")
+    .max(100, "A descrição deve possuir no máximo 100 caracteres.")
     .optional(),
 
-  status: z
-    .string()
-    .min(5, "O status deve ter no minimo 5 caracteres")
-    .optional(),
+  status: z.enum(["ATIVA", "INATIVA"]).optional(),
 
   eh_resultado_final: z.boolean().optional(),
 });
@@ -33,4 +36,3 @@ export const updateCampanhaOpcoesSchema = z.object({
 export const idParamsSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
-extendZodWithOpenApi(z);

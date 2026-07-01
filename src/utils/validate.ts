@@ -4,24 +4,22 @@ import { z } from "zod";
 type RequestSegment = "body" | "params" | "query";
 
 export const validate =
-  <T extends z.ZodType>(schema: T, segment: RequestSegment = "body") =>
+  <T extends z.ZodTypeAny>(schema: T, segment: RequestSegment = "body") =>
   (req: Request, res: Response, next: NextFunction) => {
-    try {
-      req[segment] = schema.parse(req[segment]);
-      next();
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          error: "Erro de validação",
-          details: error.issues.map((issue) => ({
-            campo: issue.path.join("."),
-            mensagem: issue.message,
-          })),
-        });
-      }
+    const result = schema.safeParse(req[segment]);
 
-      return res.status(500).json({
-        error: "Erro interno",
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Erro de validação.",
+        errors: result.error.issues.map((issue) => ({
+          campo: issue.path.join("."),
+          mensagem: issue.message,
+        })),
       });
     }
+
+    req[segment] = result.data;
+
+    next();
   };

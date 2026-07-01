@@ -1,4 +1,5 @@
 import "dotenv/config";
+import "./utils/zodErrorMap";
 import express from "express";
 import * as swaggerUi from "swagger-ui-express";
 import cors from "cors";

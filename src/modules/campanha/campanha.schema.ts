@@ -1,38 +1,36 @@
 import { z } from "zod";
-import {
-  extendZodWithOpenApi,
-  OpenAPIRegistry,
-} from "@asteasolutions/zod-to-openapi";
+import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
+
+extendZodWithOpenApi(z);
+
 export const createCampanhaSchema = z.object({
-  nome: z.string().min(3, "o nome deve ter no minimo 3 caracteres"),
+  nome: z
+    .string()
+    .trim()
+    .min(3, "O nome deve possuir pelo menos 3 caracteres.")
+    .max(100, "O nome deve possuir no máximo 100 caracteres."),
 
   data_inicio: z.coerce.date(),
+
   data_fim: z.coerce.date(),
 
-  tx_operacional: z.coerce.number(),
-  valor_bolao: z.coerce.number(),
+  tx_operacional: z.coerce
+    .number()
+    .min(0, "A taxa operacional não pode ser negativa."),
+
+  valor_bolao: z.coerce
+    .number()
+    .positive("O valor do bolão deve ser maior que zero."),
 
   is_publica: z.boolean(),
-  codigo_campanha: z.string(),
 
-  status: z.string().min(5, "O status deve ter no minimo 5 caracteres"),
-});
-export const updateCampanhaSchema = z.object({
-  nome: z.string().min(3, "o nome deve ter no minimo 3 caracteres").optional(),
-
-  data_inicio: z.coerce.date().optional(),
-  data_fim: z.coerce.date().optional(),
-
-  tx_operacional: z.coerce.number().optional(),
-  valor_bolao: z.coerce.number().optional(),
-
-  is_publica: z.boolean().optional(),
-
-  codigo_campanha: z.string().optional(),
-
-  status: z
+  codigo_campanha: z
     .string()
-    .min(5, "O status deve ter no minimo 5 caracteres")
-    .optional(),
+    .trim()
+    .min(3, "O código da campanha deve possuir pelo menos 3 caracteres.")
+    .max(30, "O código da campanha deve possuir no máximo 30 caracteres."),
+
+  status: z.enum(["ATIVA", "INATIVA", "ENCERRADA"]),
 });
-extendZodWithOpenApi(z);
+
+export const updateCampanhaSchema = createCampanhaSchema.partial();
