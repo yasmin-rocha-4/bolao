@@ -49,6 +49,13 @@ exports.campanhaOpcoesService = {
             opcao.campanha.criador_id !== usuario.id) {
             throw new Error("Você não tem permissão para alterar esta opção");
         }
+        if (data.eh_resultado_final === true) {
+            const agora = new Date();
+            if (agora <= opcao.campanha.data_fim) {
+                throw new Error("Só é possível marcar o resultado final após o fim da campanha.");
+            }
+            data.status = "INATIVA";
+        }
         return await campanha_opcoes_repo_js_1.campanhaOpcoesRepository.update(id, data);
     },
     delete: async (id, usuario) => {

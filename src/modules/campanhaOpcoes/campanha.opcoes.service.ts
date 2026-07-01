@@ -54,9 +54,7 @@ export const campanhaOpcoesService = {
     }
 
     if (campanha.criador_id !== usuario.id) {
-      throw new Error(
-        "Você não tem permissão para criar opção nesta campanha",
-      );
+      throw new Error("Você não tem permissão para criar opção nesta campanha");
     }
 
     return await campanhaOpcoesRepository.create(data);
@@ -74,6 +72,17 @@ export const campanhaOpcoesService = {
       opcao.campanha.criador_id !== usuario.id
     ) {
       throw new Error("Você não tem permissão para alterar esta opção");
+    }
+    if (data.eh_resultado_final === true) {
+      const agora = new Date();
+
+      if (agora <= opcao.campanha.data_fim) {
+        throw new Error(
+          "Só é possível marcar o resultado final após o fim da campanha.",
+        );
+      }
+
+      data.status = "INATIVA";
     }
 
     return await campanhaOpcoesRepository.update(id, data);
