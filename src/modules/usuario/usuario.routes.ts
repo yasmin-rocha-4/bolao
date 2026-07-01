@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { validate } from "../../utils/validate";
+import { adminMiddleware } from "../../middlewares/admin.middleware";
 import {
   getAll,
   getById,
@@ -11,10 +12,10 @@ import * as usuarioSchema from "./usuario.schema";
 const router = Router();
 
 // LISTAR TODOS
-router.get("/", getAll);
+router.get("/", adminMiddleware, getAll);
 
 // BUSCAR POR ID
-router.get("/:id", getById);
+router.get("/:id", adminMiddleware, getById);
 
 // CRIAR
 

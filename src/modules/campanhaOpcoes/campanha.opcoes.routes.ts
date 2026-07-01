@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { validate } from "../../utils/validate.js";
+import { validate } from "../../utils/validate";
+import { adminMiddleware } from "../../middlewares/admin.middleware";
 import {
   create,
   update,
@@ -16,14 +17,16 @@ router.get("/", findAll);
 router.get("/:id", findById);
 router.post(
   "/",
+  adminMiddleware,
   validate(campanhaOpcoesSchema.createCampanhaOpcoesSchema),
   create,
 );
 router.put(
   "/:id",
+  adminMiddleware,
   validate(campanhaOpcoesSchema.updateCampanhaOpcoesSchema),
   update,
 );
-router.delete("/:id", remove);
+router.delete("/:id", adminMiddleware, remove);
 
 export default router;

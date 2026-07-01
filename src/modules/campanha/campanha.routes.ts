@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { validate } from "../../utils/validate";
+import { adminMiddleware } from "../../middlewares/admin.middleware";
 import { getAll, getById, create, update, remove } from "./campanha.controller";
 
 import * as campanhaSchema from "./campanha.schema";
