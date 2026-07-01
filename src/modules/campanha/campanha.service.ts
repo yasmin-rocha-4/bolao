@@ -41,6 +41,11 @@ export const campanhaService = {
   },
 
   create: async (data: any, usuario: UsuarioToken) => {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const dataInicio = new Date(data.data_inicio);
+    dataInicio.setHours(0, 0, 0, 0);
     if (usuario.tipo_usuario !== "administrador") {
       throw new Error("Apenas administradores podem criar campanhas");
     }
@@ -48,6 +53,11 @@ export const campanhaService = {
     if (data.data_inicio >= data.data_fim) {
       throw new Error("A data de início deve ser anterior à data de fim");
     }
+    
+
+    if (dataInicio < hoje) {
+      throw new Error("A data de início não pode ser anterior à data de hoje.");
+    } 
 
     return await campanhaRepository.create({
       ...data,
@@ -68,6 +78,15 @@ export const campanhaService = {
     ) {
       throw new Error("Você não tem permissão para editar esta campanha");
     }
+    if (data.status === "ENCERRADA" || data.status === "INATIVA") {
+  const pendentes = await campanhaRepository.temApostasPendentes(id);
+
+  if (pendentes > 0) {
+    throw new Error(
+      "Não é possível encerrar ou inativar a campanha enquanto houver pagamentos pendentes.",
+    );
+  }
+}
 
     return await campanhaRepository.update(id, data);
   },

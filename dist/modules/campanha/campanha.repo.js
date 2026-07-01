@@ -62,4 +62,14 @@ exports.campanhaRepository = {
             },
         });
     },
+    temApostasPendentes: (campanhaId) => {
+        return prismaClient_1.default.aposta.count({
+            where: {
+                status: "PENDENTE",
+                campanhaOpcao: {
+                    campanha_id: campanhaId,
+                },
+            },
+        });
+    },
 };

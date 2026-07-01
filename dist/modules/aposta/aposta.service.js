@@ -43,8 +43,14 @@ exports.apostaService = {
         if (now > campanha.data_fim) {
             throw new Error("Campanha já foi encerrada");
         }
+        let statusPagamento = data.status || "PENDENTE";
+        if (data.meio_pagamento === "CARTAO_CREDITO" ||
+            data.meio_pagamento === "CARTAO_DEBITO") {
+            statusPagamento = "PAGO";
+        }
         return await aposta_repo_js_1.apostaRepository.create({
             ...data,
+            status: statusPagamento,
             usuario_id: usuario.id,
         });
     },

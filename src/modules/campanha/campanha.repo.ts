@@ -62,4 +62,14 @@ export const campanhaRepository = {
       },
     });
   },
+  temApostasPendentes: (campanhaId: number) => {
+  return prisma.aposta.count({
+    where: {
+      status: "PENDENTE",
+      campanhaOpcao: {
+        campanha_id: campanhaId,
+      },
+    },
+  });
+},
 };
