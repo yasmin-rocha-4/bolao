@@ -1,65 +1,74 @@
 import type { Request, Response } from "express";
 import { usuarioService } from "./usuario.service.js";
-import { createUsuarioSchema, updateUsuarioSchema } from "./usuario.schema.js";
 
 export const getAll = async (_req: Request, res: Response) => {
   try {
     const usuarios = await usuarioService.getAll();
-    return res.status(200).json(usuarios);
+
+    return res.status(200).json({
+      success: true,
+      message: "Usuários encontrados com sucesso.",
+      data: usuarios,
+    });
   } catch {
-    return res.status(500).json({ mensagem: "Erro ao buscar usuários" });
+    return res.status(500).json({
+      success: false,
+      message: "Erro ao buscar usuários.",
+    });
   }
 };
 
 export const getById = async (req: Request, res: Response) => {
   try {
     const usuario = await usuarioService.getById(Number(req.params.id));
-    return res.status(200).json(usuario);
+
+    return res.status(200).json({
+      success: true,
+      message: "Usuário encontrado com sucesso.",
+      data: usuario,
+    });
   } catch (error: any) {
-    return res.status(404).json({ mensagem: error.message });
+    return res.status(404).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
 export const create = async (req: Request, res: Response) => {
-  const validation = createUsuarioSchema.safeParse(req.body);
-
-  if (!validation.success) {
-    return res.status(400).json({
-      mensagem: "Dados inválidos",
-      erros: validation.error.format(),
-    });
-  }
-
   try {
-    const usuario = await usuarioService.create(validation.data);
-    return res.status(201).json(usuario);
+    const usuario = await usuarioService.create(req.body);
+
+    return res.status(201).json({
+      success: true,
+      message: "Usuário criado com sucesso.",
+      data: usuario,
+    });
   } catch (error: any) {
-    return res.status(400).json({ mensagem: error.message });
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
 export const update = async (req: Request, res: Response) => {
-  const validation = updateUsuarioSchema.safeParse(req.body);
-
-  if (!validation.success) {
-    return res.status(400).json({
-      mensagem: "Dados inválidos",
-      erros: validation.error.format(),
-    });
-  }
-
   try {
     const usuario = await usuarioService.update(
       Number(req.params.id),
-      validation.data,
+      req.body,
     );
 
     return res.status(200).json({
-      obj: usuario,
-      message: "Usuário atualizado com sucesso",
+      success: true,
+      message: "Usuário atualizado com sucesso.",
+      data: usuario,
     });
   } catch (error: any) {
-    return res.status(400).json({ mensagem: error.message });
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -68,9 +77,13 @@ export const remove = async (req: Request, res: Response) => {
     await usuarioService.delete(Number(req.params.id));
 
     return res.status(200).json({
-      mensagem: "Usuário removido com sucesso",
+      success: true,
+      message: "Usuário removido com sucesso.",
     });
   } catch (error: any) {
-    return res.status(404).json({ mensagem: error.message });
+    return res.status(404).json({
+      success: false,
+      message: error.message,
+    });
   }
 };

@@ -1,26 +1,21 @@
 import type { Request, Response } from "express";
-import { loginSchema } from "./auth.schema";
-import { authService } from "./auth.service";
+import { authService } from "./auth.service.js";
 
 export const login = async (req: Request, res: Response) => {
-  const validation = loginSchema.safeParse(req.body);
-
-  if (!validation.success) {
-    return res.status(400).json({
-      mensagem: "Dados inválidos",
-      erros: validation.error.format(),
-    });
-  }
-
   try {
-    const { email, senha } = validation.data;
+    const { email, senha } = req.body;
 
     const resultado = await authService.login(email, senha);
 
-    return res.status(200).json(resultado);
+    return res.status(200).json({
+      success: true,
+      message: "Login realizado com sucesso.",
+      data: resultado,
+    });
   } catch (error: any) {
     return res.status(401).json({
-      mensagem: error.message,
+      success: false,
+      message: error.message,
     });
   }
 };
