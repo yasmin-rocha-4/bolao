@@ -74,6 +74,9 @@ function AdminDashboard() {
     </div>
   );
 }
+function formatarData(data: string) {
+  return new Date(data).toLocaleDateString("pt-BR");
+}
 
 function ClienteDashboard() {
   const usuario = getUsuarioLogado();
@@ -246,6 +249,13 @@ function ClienteDashboard() {
 
                 <p>
                   <strong>Status:</strong> {campanha.status}
+                </p>
+                <p>
+                  <strong>Início:</strong> {formatarData(campanha.data_inicio)}
+                </p>
+
+                <p>
+                  <strong>Fim:</strong> {formatarData(campanha.data_fim)}
                 </p>
               </div>
 
