@@ -8,6 +8,7 @@ type UsuarioToken = {
 
 export const campanhaService = {
   getAll: async (usuario: UsuarioToken) => {
+    await campanhaRepository.atualizarCampanhasExpiradas();
     if (usuario.tipo_usuario === "administrador") {
       return await campanhaRepository.getAllByCriador(usuario.id);
     }

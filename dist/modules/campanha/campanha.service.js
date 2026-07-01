@@ -4,6 +4,7 @@ exports.campanhaService = void 0;
 const campanha_repo_js_1 = require("./campanha.repo.js");
 exports.campanhaService = {
     getAll: async (usuario) => {
+        await campanha_repo_js_1.campanhaRepository.atualizarCampanhasExpiradas();
         if (usuario.tipo_usuario === "administrador") {
             return await campanha_repo_js_1.campanhaRepository.getAllByCriador(usuario.id);
         }

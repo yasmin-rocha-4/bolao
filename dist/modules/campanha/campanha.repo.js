@@ -49,4 +49,17 @@ exports.campanhaRepository = {
             where: { id },
         });
     },
+    atualizarCampanhasExpiradas: () => {
+        return prismaClient_1.default.campanha.updateMany({
+            where: {
+                data_fim: {
+                    lt: new Date(),
+                },
+                status: "ATIVA",
+            },
+            data: {
+                status: "INATIVA",
+            },
+        });
+    },
 };
