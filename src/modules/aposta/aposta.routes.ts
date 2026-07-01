@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { validate } from "../../utils/validate.js";
+import { authMiddleware } from "../../middlewares/auth.middleware";
 import {
   getAll,
   getById,
@@ -13,11 +14,21 @@ import * as apostaSchema from "./aposta.schema.js";
 
 const router = Router();
 
-router.get("/", getAll);
-router.get("/vencedores", getAllVencedores);
-router.get("/:id", getById);
-router.post("/", validate(apostaSchema.createApostaSchema), create);
-router.put("/:id", validate(apostaSchema.updateApostaSchema), update);
-router.delete("/:id", remove);
+router.get("/", authMiddleware, getAll);
+router.get("/vencedores", authMiddleware, getAllVencedores);
+router.get("/:id", authMiddleware, getById);
+router.post(
+  "/",
+  authMiddleware,
+  validate(apostaSchema.createApostaSchema),
+  create,
+);
+router.put(
+  "/:id",
+  authMiddleware,
+  validate(apostaSchema.updateApostaSchema),
+  update,
+);
+router.delete("/:id", authMiddleware, remove);
 
 export default router;
