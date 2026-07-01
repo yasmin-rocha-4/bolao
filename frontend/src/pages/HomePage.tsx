@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-
+import PagamentoForm from "../components/PagamentoForm";
 import { campanhaService } from "../services/campanha.service";
 import { campanhaOpcaoService } from "../services/campanhaOpcao.service";
 import { apostaService } from "../services/aposta.service";
@@ -80,11 +80,27 @@ function ClienteDashboard() {
 
   const [campanhas, setCampanhas] = useState<Campanha[]>([]);
   const [opcoes, setOpcoes] = useState<CampanhaOpcao[]>([]);
+
   const [opcoesSelecionadas, setOpcoesSelecionadas] = useState<
     Record<number, number>
   >({});
   const [pagamentos, setPagamentos] = useState<Record<number, string>>({});
   const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [comprovantes, setComprovantes] = useState<Record<number, string>>({});
+  const [boletosGerados, setBoletosGerados] = useState<Record<number, boolean>>(
+    {},
+  );
+  const [dadosCartoes, setDadosCartoes] = useState<
+    Record<
+      number,
+      {
+        numero: string;
+        nome: string;
+        validade: string;
+        cvv: string;
+      }
+    >
+  >({});
 
   async function carregarDados() {
     try {
@@ -116,6 +132,32 @@ function ClienteDashboard() {
       toast.error("Selecione uma opção de palpite.");
       return;
     }
+    if (meioPagamento === "PIX" && !comprovantes[campanha.id]) {
+      toast.error("É necessário enviar o comprovante do PIX.");
+      return;
+    }
+
+    if (
+      meioPagamento === "CARTAO_CREDITO" ||
+      meioPagamento === "CARTAO_DEBITO"
+    ) {
+      const cartao = dadosCartoes[campanha.id];
+
+      if (
+        !cartao?.numero ||
+        !cartao?.nome ||
+        !cartao?.validade ||
+        !cartao?.cvv
+      ) {
+        toast.error("Preencha todos os dados do cartão.");
+        return;
+      }
+    }
+
+    if (meioPagamento === "BOLETO" && !boletosGerados[campanha.id]) {
+      toast.error("Gere o boleto antes de confirmar a aposta.");
+      return;
+    }
 
     try {
       setLoadingId(campanha.id);
@@ -124,7 +166,7 @@ function ClienteDashboard() {
         campanha_opcao_id: opcaoId,
         meio_pagamento: meioPagamento,
         status: "PENDENTE",
-        comprovante: "",
+        comprovante: comprovantes[campanha.id] || "",
       });
 
       toast.success("Aposta criada com sucesso!");
@@ -132,6 +174,11 @@ function ClienteDashboard() {
       setOpcoesSelecionadas({
         ...opcoesSelecionadas,
         [campanha.id]: 0,
+      });
+
+      setComprovantes({
+        ...comprovantes,
+        [campanha.id]: "",
       });
     } catch (error: any) {
       const primeiroErro = error?.response?.data?.errors?.[0]?.mensagem;
@@ -249,6 +296,37 @@ function ClienteDashboard() {
                       })
                     }
                   >
+                    <PagamentoForm
+                      tipo={pagamentos[campanha.id] || "PIX"}
+                      comprovante={comprovantes[campanha.id] || ""}
+                      boletoGerado={boletosGerados[campanha.id] || false}
+                      dadosCartao={
+                        dadosCartoes[campanha.id] || {
+                          numero: "",
+                          nome: "",
+                          validade: "",
+                          cvv: "",
+                        }
+                      }
+                      onComprovanteChange={(valor) =>
+                        setComprovantes({
+                          ...comprovantes,
+                          [campanha.id]: valor,
+                        })
+                      }
+                      onBoletoGeradoChange={(valor) =>
+                        setBoletosGerados({
+                          ...boletosGerados,
+                          [campanha.id]: valor,
+                        })
+                      }
+                      onDadosCartaoChange={(dados) =>
+                        setDadosCartoes({
+                          ...dadosCartoes,
+                          [campanha.id]: dados,
+                        })
+                      }
+                    />
                     <option value="PIX">PIX</option>
                     <option value="CARTAO_CREDITO">Cartão de Crédito</option>
                     <option value="CARTAO_DEBITO">Cartão de Débito</option>

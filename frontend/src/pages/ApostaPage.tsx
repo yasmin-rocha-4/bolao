@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import { apostaService } from "../services/aposta.service";
 
@@ -8,8 +9,14 @@ export default function ApostasPage() {
   const [apostas, setApostas] = useState<Aposta[]>([]);
 
   async function carregarApostas() {
-    const apostasData = await apostaService.getAll();
-    setApostas(apostasData);
+    try {
+      const apostasData = await apostaService.getAll();
+      setApostas(apostasData);
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "Erro ao carregar apostas.",
+      );
+    }
   }
 
   useEffect(() => {
