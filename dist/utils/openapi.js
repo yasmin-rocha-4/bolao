@@ -25,7 +25,7 @@ exports.openApiDocument = generator.generateDocument({
     info: {
         title: "API Bolão da Copa",
         version: "1.0.0",
-        description: "API para gerenciamento de usuários, autenticação, campanhas, opções de campanha, apostas e vencedores do bolão.",
+        description: "API para gerenciamento de autenticação, usuários, campanhas, opções de campanha, apostas e vencedores do bolão.",
     },
     servers: [
         {
