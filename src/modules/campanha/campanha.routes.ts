@@ -8,20 +8,22 @@ import * as campanhaSchema from "./campanha.schema";
 
 const router = Router();
 
-router.get("/", getAll);
-router.get("/:id", getById);
+router.get("/", authMiddleware, getAll);
+router.get("/:id", authMiddleware, getById);
 router.post(
   "/",
+  authMiddleware,
   adminMiddleware,
   validate(campanhaSchema.createCampanhaSchema),
   create,
 );
 router.put(
   "/:id",
+  authMiddleware,
   adminMiddleware,
   validate(campanhaSchema.updateCampanhaSchema),
   update,
 );
-router.delete("/:id", adminMiddleware, remove);
+router.delete("/:id", authMiddleware, adminMiddleware, remove);
 
 export default router;

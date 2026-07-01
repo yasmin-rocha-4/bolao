@@ -12,12 +12,24 @@ jest.mock("./usuario.repo", () => ({
   },
 }));
 
+const admin = {
+  id: 10,
+  email: "admin@email.com",
+  tipo_usuario: "administrador",
+};
+
+const cliente = {
+  id: 1,
+  email: "cliente@email.com",
+  tipo_usuario: "cliente",
+};
+
 describe("usuarioService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("deve listar usuários", async () => {
+  it("deve listar usuários quando for administrador", async () => {
     const usuariosMock = [
       {
         id: 1,
@@ -33,13 +45,21 @@ describe("usuarioService", () => {
 
     (usuarioRepository.getAll as jest.Mock).mockResolvedValue(usuariosMock);
 
-    const resultado = await usuarioService.getAll();
+    const resultado = await usuarioService.getAll(admin);
 
     expect(resultado).toEqual(usuariosMock);
     expect(usuarioRepository.getAll).toHaveBeenCalledTimes(1);
   });
 
-  it("deve buscar usuário por ID existente", async () => {
+  it("não deve permitir cliente listar todos os usuários", async () => {
+    await expect(usuarioService.getAll(cliente)).rejects.toThrow(
+      "Apenas administradores podem listar usuários.",
+    );
+
+    expect(usuarioRepository.getAll).not.toHaveBeenCalled();
+  });
+
+  it("deve buscar próprio usuário por ID", async () => {
     const usuario = {
       id: 1,
       nome: "Maria Silva",
@@ -48,17 +68,40 @@ describe("usuarioService", () => {
 
     (usuarioRepository.getById as jest.Mock).mockResolvedValue(usuario);
 
-    const resultado = await usuarioService.getById(1);
+    const resultado = await usuarioService.getById(1, cliente);
 
     expect(resultado).toEqual(usuario);
     expect(usuarioRepository.getById).toHaveBeenCalledWith(1);
   });
 
+  it("deve permitir administrador buscar qualquer usuário por ID", async () => {
+    const usuario = {
+      id: 2,
+      nome: "Carlos Silva",
+      email: "carlos@email.com",
+    };
+
+    (usuarioRepository.getById as jest.Mock).mockResolvedValue(usuario);
+
+    const resultado = await usuarioService.getById(2, admin);
+
+    expect(resultado).toEqual(usuario);
+    expect(usuarioRepository.getById).toHaveBeenCalledWith(2);
+  });
+
+  it("não deve permitir cliente acessar perfil de outro usuário", async () => {
+    await expect(usuarioService.getById(99, cliente)).rejects.toThrow(
+      "Você só pode acessar o seu próprio perfil.",
+    );
+
+    expect(usuarioRepository.getById).not.toHaveBeenCalled();
+  });
+
   it("deve retornar erro ao buscar usuário inexistente", async () => {
     (usuarioRepository.getById as jest.Mock).mockResolvedValue(null);
 
-    await expect(usuarioService.getById(99)).rejects.toThrow(
-      "Usuário não encontrado",
+    await expect(usuarioService.getById(99, admin)).rejects.toThrow(
+      "Usuário não encontrado.",
     );
   });
 
@@ -84,25 +127,27 @@ describe("usuarioService", () => {
     const resultado = await usuarioService.create(novoUsuario);
 
     expect(resultado).toEqual(usuarioCriado);
+
     expect(usuarioRepository.getByEmail).toHaveBeenCalledWith(
       novoUsuario.email,
     );
-    expect(usuarioRepository.create).toHaveBeenCalledWith(
-  expect.objectContaining({
-    nome: novoUsuario.nome,
-    email: novoUsuario.email,
-    cpf: novoUsuario.cpf,
-    telefone: novoUsuario.telefone,
-    tipo_usuario: "cliente",
-    status: "ativo",
-  }),
-);
 
-expect(usuarioRepository.create).toHaveBeenCalledWith(
-  expect.objectContaining({
-    senha: expect.stringMatching(/^\$2[aby]\$/),
-  }),
-);
+    expect(usuarioRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        nome: novoUsuario.nome,
+        email: novoUsuario.email,
+        cpf: novoUsuario.cpf,
+        telefone: novoUsuario.telefone,
+        tipo_usuario: "cliente",
+        status: "ativo",
+      }),
+    );
+
+    expect(usuarioRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        senha: expect.stringMatching(/^\$2[aby]\$/),
+      }),
+    );
   });
 
   it("não deve criar usuário com e-mail já cadastrado", async () => {
@@ -125,7 +170,7 @@ expect(usuarioRepository.create).toHaveBeenCalledWith(
     );
 
     await expect(usuarioService.create(usuario)).rejects.toThrow(
-      "E-mail já cadastrado",
+      "E-mail já cadastrado.",
     );
 
     expect(usuarioRepository.create).not.toHaveBeenCalled();
@@ -151,14 +196,49 @@ expect(usuarioRepository.create).toHaveBeenCalledWith(
     (usuarioRepository.getById as jest.Mock).mockResolvedValue(usuarioAtual);
     (usuarioRepository.getByEmail as jest.Mock).mockResolvedValue(outroUsuario);
 
-    await expect(usuarioService.update(1, dadosAtualizacao)).rejects.toThrow(
-      "E-mail já utilizado por outro usuário",
-    );
+    await expect(
+      usuarioService.update(1, dadosAtualizacao, cliente),
+    ).rejects.toThrow("E-mail já utilizado por outro usuário.");
 
     expect(usuarioRepository.update).not.toHaveBeenCalled();
   });
 
-  it("deve remover usuário existente", async () => {
+  it("deve atualizar próprio usuário", async () => {
+    const usuarioAtual = {
+      id: 1,
+      nome: "Maria Silva",
+      email: "maria@email.com",
+    };
+
+    const dadosAtualizacao = {
+      nome: "Maria Atualizada",
+    };
+
+    const usuarioAtualizado = {
+      ...usuarioAtual,
+      ...dadosAtualizacao,
+    };
+
+    (usuarioRepository.getById as jest.Mock).mockResolvedValue(usuarioAtual);
+    (usuarioRepository.update as jest.Mock).mockResolvedValue(
+      usuarioAtualizado,
+    );
+
+    const resultado = await usuarioService.update(1, dadosAtualizacao, cliente);
+
+    expect(resultado).toEqual(usuarioAtualizado);
+    expect(usuarioRepository.update).toHaveBeenCalledWith(1, dadosAtualizacao);
+  });
+
+  it("não deve permitir cliente atualizar outro usuário", async () => {
+    await expect(
+      usuarioService.update(99, { nome: "Teste" }, cliente),
+    ).rejects.toThrow("Você só pode editar o seu próprio perfil.");
+
+    expect(usuarioRepository.update).not.toHaveBeenCalled();
+  });
+
+  it("deve remover próprio usuário existente", async () => {
     const usuario = {
       id: 1,
       nome: "Maria Silva",
@@ -168,17 +248,41 @@ expect(usuarioRepository.create).toHaveBeenCalledWith(
     (usuarioRepository.getById as jest.Mock).mockResolvedValue(usuario);
     (usuarioRepository.delete as jest.Mock).mockResolvedValue(usuario);
 
-    const resultado = await usuarioService.delete(1);
+    const resultado = await usuarioService.delete(1, cliente);
 
     expect(resultado).toEqual(usuario);
     expect(usuarioRepository.delete).toHaveBeenCalledWith(1);
   });
 
+  it("deve permitir administrador remover qualquer usuário existente", async () => {
+    const usuario = {
+      id: 2,
+      nome: "Carlos Silva",
+      email: "carlos@email.com",
+    };
+
+    (usuarioRepository.getById as jest.Mock).mockResolvedValue(usuario);
+    (usuarioRepository.delete as jest.Mock).mockResolvedValue(usuario);
+
+    const resultado = await usuarioService.delete(2, admin);
+
+    expect(resultado).toEqual(usuario);
+    expect(usuarioRepository.delete).toHaveBeenCalledWith(2);
+  });
+
+  it("não deve permitir cliente remover outro usuário", async () => {
+    await expect(usuarioService.delete(99, cliente)).rejects.toThrow(
+      "Você só pode excluir o seu próprio perfil.",
+    );
+
+    expect(usuarioRepository.delete).not.toHaveBeenCalled();
+  });
+
   it("não deve remover usuário inexistente", async () => {
     (usuarioRepository.getById as jest.Mock).mockResolvedValue(null);
 
-    await expect(usuarioService.delete(99)).rejects.toThrow(
-      "Usuário não encontrado",
+    await expect(usuarioService.delete(99, admin)).rejects.toThrow(
+      "Usuário não encontrado.",
     );
 
     expect(usuarioRepository.delete).not.toHaveBeenCalled();

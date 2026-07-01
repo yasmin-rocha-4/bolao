@@ -5,31 +5,46 @@ const zod_1 = require("zod");
 const zod_to_openapi_1 = require("@asteasolutions/zod-to-openapi");
 (0, zod_to_openapi_1.extendZodWithOpenApi)(zod_1.z);
 exports.createUsuarioSchema = zod_1.z.object({
-    nome: zod_1.z.string().min(3, "o nome deve ter no minimo 3 caracteres"),
-    email: zod_1.z.email("O email deve ser válido"),
-    senha: zod_1.z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
-    cpf: zod_1.z.string().min(11, "O cpf deve ter no minimo 11 numeros"),
-    telefone: zod_1.z
+    nome: zod_1.z
         .string()
-        .min(11, "O telefone deve ter no minimo 11 caracteres incluindo o ddd")
-        .optional(),
-    tipo_usuario: zod_1.z
-        .enum(["cliente", "administrador"])
-        .default("cliente"),
-});
-exports.updateUsuarioSchema = zod_1.z.object({
-    nome: zod_1.z.string().min(3, "o nome deve ter no minimo 3 caracteres").optional(),
-    email: zod_1.z.email("O email deve ser válido").optional(),
+        .trim()
+        .min(3, "O nome deve possuir pelo menos 3 caracteres.")
+        .max(100, "O nome deve possuir no máximo 100 caracteres."),
+    email: zod_1.z.string().trim().email("Informe um e-mail válido."),
     senha: zod_1.z
         .string()
-        .min(8, "A senha deve ter pelo menos 8 caracteres")
+        .min(8, "A senha deve possuir pelo menos 8 caracteres.")
+        .regex(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula.")
+        .regex(/[0-9]/, "A senha deve conter pelo menos um número."),
+    cpf: zod_1.z
+        .string()
+        .trim()
+        .regex(/^\d{11}$/, "CPF deve conter exatamente 11 números."),
+    telefone: zod_1.z
+        .string()
+        .trim()
+        .regex(/^\d{10,11}$/, "Telefone inválido.")
+        .optional(),
+    tipo_usuario: zod_1.z.enum(["cliente", "administrador"]).default("cliente"),
+});
+exports.updateUsuarioSchema = zod_1.z.object({
+    nome: zod_1.z
+        .string()
+        .trim()
+        .min(3, "O nome deve possuir pelo menos 3 caracteres.")
+        .max(100, "O nome deve possuir no máximo 100 caracteres.")
+        .optional(),
+    email: zod_1.z.string().trim().email("Informe um e-mail válido.").optional(),
+    senha: zod_1.z
+        .string()
+        .min(8, "A senha deve possuir pelo menos 8 caracteres.")
+        .regex(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula.")
+        .regex(/[0-9]/, "A senha deve conter pelo menos um número.")
         .optional(),
     telefone: zod_1.z
         .string()
-        .min(11, "O telefone deve ter no minimo 11 caracteres incluindo o ddd")
+        .trim()
+        .regex(/^\d{10,11}$/, "Telefone inválido.")
         .optional(),
-    status: zod_1.z
-        .string()
-        .min(5, "O status deve ter no minimo 5 caracteres")
-        .optional(),
+    status: zod_1.z.enum(["ATIVO", "INATIVO"]).optional(),
 });

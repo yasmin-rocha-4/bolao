@@ -1,26 +1,30 @@
 import type { Request, Response } from "express";
+import type { AuthRequest } from "../../middlewares/auth.middleware.js";
 import { usuarioService } from "./usuario.service.js";
 
-export const getAll = async (_req: Request, res: Response) => {
+export const getAll = async (req: AuthRequest, res: Response) => {
   try {
-    const usuarios = await usuarioService.getAll();
+    const usuarios = await usuarioService.getAll(req.usuario!);
 
     return res.status(200).json({
       success: true,
       message: "Usuários encontrados com sucesso.",
       data: usuarios,
     });
-  } catch {
-    return res.status(500).json({
+  } catch (error: any) {
+    return res.status(403).json({
       success: false,
-      message: "Erro ao buscar usuários.",
+      message: error.message,
     });
   }
 };
 
-export const getById = async (req: Request, res: Response) => {
+export const getById = async (req: AuthRequest, res: Response) => {
   try {
-    const usuario = await usuarioService.getById(Number(req.params.id));
+    const usuario = await usuarioService.getById(
+      Number(req.params.id),
+      req.usuario!,
+    );
 
     return res.status(200).json({
       success: true,
@@ -28,7 +32,7 @@ export const getById = async (req: Request, res: Response) => {
       data: usuario,
     });
   } catch (error: any) {
-    return res.status(404).json({
+    return res.status(403).json({
       success: false,
       message: error.message,
     });
@@ -52,11 +56,12 @@ export const create = async (req: Request, res: Response) => {
   }
 };
 
-export const update = async (req: Request, res: Response) => {
+export const update = async (req: AuthRequest, res: Response) => {
   try {
     const usuario = await usuarioService.update(
       Number(req.params.id),
       req.body,
+      req.usuario!,
     );
 
     return res.status(200).json({
@@ -65,23 +70,23 @@ export const update = async (req: Request, res: Response) => {
       data: usuario,
     });
   } catch (error: any) {
-    return res.status(400).json({
+    return res.status(403).json({
       success: false,
       message: error.message,
     });
   }
 };
 
-export const remove = async (req: Request, res: Response) => {
+export const remove = async (req: AuthRequest, res: Response) => {
   try {
-    await usuarioService.delete(Number(req.params.id));
+    await usuarioService.delete(Number(req.params.id), req.usuario!);
 
     return res.status(200).json({
       success: true,
       message: "Usuário removido com sucesso.",
     });
   } catch (error: any) {
-    return res.status(404).json({
+    return res.status(403).json({
       success: false,
       message: error.message,
     });

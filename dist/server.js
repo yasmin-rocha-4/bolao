@@ -37,6 +37,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv/config");
+require("./utils/zodErrorMap");
 const express_1 = __importDefault(require("express"));
 const swaggerUi = __importStar(require("swagger-ui-express"));
 const cors_1 = __importDefault(require("cors"));
@@ -46,15 +47,14 @@ const campanha_opcoes_routes_1 = __importDefault(require("./modules/campanhaOpco
 const aposta_routes_1 = __importDefault(require("./modules/aposta/aposta.routes"));
 const auth_routes_1 = __importDefault(require("./modules/auth/auth.routes"));
 const openapi_1 = require("./utils/openapi");
-const auth_middleware_1 = require("./middlewares/auth.middleware");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use("/auth", auth_routes_1.default);
 app.use("/usuarios", usuario_routes_1.default);
-app.use("/campanhas", auth_middleware_1.authMiddleware, campanha_routes_1.default);
-app.use("/campanha-opcoes", auth_middleware_1.authMiddleware, campanha_opcoes_routes_1.default);
-app.use("/apostas", auth_middleware_1.authMiddleware, aposta_routes_1.default);
+app.use("/campanhas", campanha_routes_1.default);
+app.use("/campanha-opcoes", campanha_opcoes_routes_1.default);
+app.use("/apostas", aposta_routes_1.default);
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(openapi_1.openApiDocument));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

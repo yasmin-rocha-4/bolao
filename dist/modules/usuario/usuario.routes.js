@@ -35,17 +35,13 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const validate_1 = require("../../utils/validate");
+const auth_middleware_1 = require("../../middlewares/auth.middleware");
 const usuario_controller_js_1 = require("./usuario.controller.js");
 const usuarioSchema = __importStar(require("./usuario.schema"));
 const router = (0, express_1.Router)();
-// LISTAR TODOS
-router.get("/", usuario_controller_js_1.getAll);
-// BUSCAR POR ID
-router.get("/:id", usuario_controller_js_1.getById);
-// CRIAR
 router.post("/", (0, validate_1.validate)(usuarioSchema.createUsuarioSchema), usuario_controller_js_1.create);
-// ATUALIZAR
-router.put("/:id", (0, validate_1.validate)(usuarioSchema.updateUsuarioSchema), usuario_controller_js_1.update);
-// DELETAR
-router.delete("/:id", usuario_controller_js_1.remove);
+router.get("/", auth_middleware_1.authMiddleware, usuario_controller_js_1.getAll);
+router.get("/:id", auth_middleware_1.authMiddleware, usuario_controller_js_1.getById);
+router.put("/:id", auth_middleware_1.authMiddleware, (0, validate_1.validate)(usuarioSchema.updateUsuarioSchema), usuario_controller_js_1.update);
+router.delete("/:id", auth_middleware_1.authMiddleware, usuario_controller_js_1.remove);
 exports.default = router;
