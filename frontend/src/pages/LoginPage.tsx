@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import { authService } from "../services/auth.service";
 
 export default function LoginPage() {
@@ -14,12 +15,17 @@ export default function LoginPage() {
     try {
       const response = await authService.login({ email, senha });
 
-      localStorage.setItem("token", response.token);
-      localStorage.setItem("usuario", JSON.stringify(response.usuario));
+      const resultado = response.data ?? response;
 
+      localStorage.setItem("token", resultado.token);
+      localStorage.setItem("usuario", JSON.stringify(resultado.usuario));
+
+      toast.success("Login realizado com sucesso!");
       navigate("/");
-    } catch {
-      alert("E-mail ou senha inválidos");
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "E-mail ou senha inválidos.",
+      );
     }
   }
 

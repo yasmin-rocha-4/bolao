@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+
 import { campanhaService } from "../services/campanha.service";
 import type { Campanha, CampanhaForm } from "../types/campanha";
 
@@ -25,29 +27,46 @@ export default function CampanhasPage() {
   );
 
   async function carregarCampanhas() {
-    const data = await campanhaService.getAll();
-    setCampanhas(data);
+    try {
+      const data = await campanhaService.getAll();
+      setCampanhas(data);
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "Erro ao carregar campanhas.",
+      );
+    }
   }
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
 
-    const dadosParaApi = {
-      ...form,
-      data_inicio: `${form.data_inicio}T00:00:00.000Z`,
-      data_fim: `${form.data_fim}T23:59:59.000Z`,
-    };
+    try {
+      const dadosParaApi = {
+        ...form,
+        data_inicio: `${form.data_inicio}T00:00:00.000Z`,
+        data_fim: `${form.data_fim}T23:59:59.000Z`,
+      };
 
-    if (campanhaEditandoId) {
-      await campanhaService.update(campanhaEditandoId, dadosParaApi);
-    } else {
-      await campanhaService.create(dadosParaApi);
+      if (campanhaEditandoId) {
+        await campanhaService.update(campanhaEditandoId, dadosParaApi);
+        toast.success("Campanha atualizada com sucesso!");
+      } else {
+        await campanhaService.create(dadosParaApi);
+        toast.success("Campanha criada com sucesso!");
+      }
+
+      setForm(formInicial);
+      setCampanhaEditandoId(null);
+      await carregarCampanhas();
+    } catch (error: any) {
+      const primeiroErro = error?.response?.data?.errors?.[0]?.mensagem;
+
+      toast.error(
+        primeiroErro ||
+          error?.response?.data?.message ||
+          "Erro ao salvar campanha.",
+      );
     }
-
-    setForm(formInicial);
-    setCampanhaEditandoId(null);
-
-    carregarCampanhas();
   }
 
   function editar(campanha: Campanha) {
@@ -71,8 +90,19 @@ export default function CampanhasPage() {
   }
 
   async function remover(id: number) {
-    await campanhaService.delete(id);
-    carregarCampanhas();
+    const confirmar = confirm("Deseja realmente excluir esta campanha?");
+
+    if (!confirmar) return;
+
+    try {
+      await campanhaService.delete(id);
+      toast.success("Campanha removida com sucesso!");
+      await carregarCampanhas();
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "Erro ao excluir campanha.",
+      );
+    }
   }
 
   useEffect(() => {
@@ -287,6 +317,17 @@ export default function CampanhasPage() {
                 </td>
               </tr>
             ))}
+
+            {campanhas.length === 0 && (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="px-4 py-6 text-center text-sm text-slate-500"
+                >
+                  Nenhuma campanha cadastrada.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

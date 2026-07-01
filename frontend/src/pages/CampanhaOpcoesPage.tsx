@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import { campanhaOpcaoService } from "../services/campanhaOpcao.service";
 import { campanhaService } from "../services/campanha.service";
@@ -20,28 +21,46 @@ export default function CampanhaOpcoesPage() {
   const [editandoId, setEditandoId] = useState<number | null>(null);
 
   async function carregarDados() {
-    const [opcoesData, campanhasData] = await Promise.all([
-      campanhaOpcaoService.getAll(),
-      campanhaService.getAll(),
-    ]);
+    try {
+      const [opcoesData, campanhasData] = await Promise.all([
+        campanhaOpcaoService.getAll(),
+        campanhaService.getAll(),
+      ]);
 
-    setOpcoes(opcoesData);
-    setCampanhas(campanhasData);
+      setOpcoes(opcoesData);
+      setCampanhas(campanhasData);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Erro ao carregar dados.");
+    }
   }
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
 
-    if (editandoId) {
-      await campanhaOpcaoService.update(editandoId, form);
-    } else {
-      await campanhaOpcaoService.create(form);
+    try {
+      if (editandoId) {
+        await campanhaOpcaoService.update(editandoId, form);
+
+        toast.success("Opção atualizada com sucesso!");
+      } else {
+        await campanhaOpcaoService.create(form);
+
+        toast.success("Opção criada com sucesso!");
+      }
+
+      setForm(formInicial);
+      setEditandoId(null);
+
+      await carregarDados();
+    } catch (error: any) {
+      const primeiroErro = error?.response?.data?.errors?.[0]?.mensagem;
+
+      toast.error(
+        primeiroErro ||
+          error?.response?.data?.message ||
+          "Erro ao salvar opção.",
+      );
     }
-
-    setForm(formInicial);
-    setEditandoId(null);
-
-    carregarDados();
   }
 
   function editar(opcao: CampanhaOpcao) {
@@ -60,17 +79,21 @@ export default function CampanhaOpcoesPage() {
     setForm(formInicial);
   }
 
-async function remover(id: number) {
-  try {
-    await campanhaOpcaoService.delete(id);
-    await carregarDados();
-  } catch (error: any) {
-    alert(
-      error?.response?.data?.mensagem ||
-        "Erro ao excluir opção da campanha",
-    );
+  async function remover(id: number) {
+    const confirmar = confirm("Deseja realmente excluir esta opção?");
+
+    if (!confirmar) return;
+
+    try {
+      await campanhaOpcaoService.delete(id);
+
+      toast.success("Opção removida com sucesso!");
+
+      await carregarDados();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Erro ao excluir opção.");
+    }
   }
-}
 
   function nomeCampanha(id: number) {
     return (
@@ -228,6 +251,17 @@ async function remover(id: number) {
                 </Td>
               </tr>
             ))}
+
+            {opcoes.length === 0 && (
+              <tr>
+                <td
+                  colSpan={6}
+                  className="px-4 py-6 text-center text-sm text-slate-500"
+                >
+                  Nenhuma opção de campanha cadastrada.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

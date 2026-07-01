@@ -19,9 +19,7 @@ export default function ApostasPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold text-slate-900">
-          Minhas Apostas
-        </h2>
+        <h2 className="text-3xl font-bold text-slate-900">Minhas Apostas</h2>
 
         <p className="mt-2 text-slate-600">
           Consulte e acompanhe suas apostas cadastradas.
@@ -44,21 +42,14 @@ export default function ApostasPage() {
 
           <tbody>
             {apostas.map((aposta) => (
-              <tr
-                key={aposta.id}
-                className="border-t border-slate-200"
-              >
+              <tr key={aposta.id} className="border-t border-slate-200">
                 <Td>{aposta.id}</Td>
 
                 <Td>{aposta.usuario?.nome || "Você"}</Td>
 
-                <Td>
-                  {aposta.campanhaOpcao?.campanha?.nome || "-"}
-                </Td>
+                <Td>{aposta.campanhaOpcao?.campanha?.nome || "-"}</Td>
 
-                <Td>
-                  {aposta.campanhaOpcao?.descricao || "-"}
-                </Td>
+                <Td>{aposta.campanhaOpcao?.descricao || "-"}</Td>
 
                 <Td>{aposta.meio_pagamento}</Td>
 
@@ -85,11 +76,7 @@ export default function ApostasPage() {
   );
 }
 
-function Th({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function Th({ children }: { children: React.ReactNode }) {
   return (
     <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
       {children}
@@ -97,14 +84,6 @@ function Th({
   );
 }
 
-function Td({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <td className="px-4 py-3 text-sm text-slate-700">
-      {children}
-    </td>
-  );
+function Td({ children }: { children: React.ReactNode }) {
+  return <td className="px-4 py-3 text-sm text-slate-700">{children}</td>;
 }

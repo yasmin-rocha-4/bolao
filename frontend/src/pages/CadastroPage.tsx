@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import { usuarioService } from "../services/usuario.service";
 
 const formInicial = {
@@ -20,18 +21,20 @@ export default function CadastroPage() {
 
     try {
       await usuarioService.create({
-        nome: form.nome,
-        cpf: form.cpf,
-        email: form.email,
-        telefone: form.telefone,
-        senha: form.senha,
-        tipo_usuario: form.tipo_usuario,
+        ...form,
+        status: "ativo",
       });
 
-      alert("Cadastro realizado com sucesso!");
+      toast.success("Cadastro realizado com sucesso!");
       navigate("/login");
     } catch (error: any) {
-      alert(error?.response?.data?.mensagem || "Erro ao cadastrar usuário");
+      const primeiroErro = error?.response?.data?.errors?.[0]?.mensagem;
+
+      toast.error(
+        primeiroErro ||
+          error?.response?.data?.message ||
+          "Erro ao cadastrar usuário.",
+      );
     }
   }
 

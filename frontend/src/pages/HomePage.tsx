@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import { campanhaService } from "../services/campanha.service";
 import { campanhaOpcaoService } from "../services/campanhaOpcao.service";
@@ -26,20 +27,26 @@ function AdminDashboard() {
   const [participantes, setParticipantes] = useState(0);
 
   async function carregarDashboard() {
-    const [campanhasData, opcoesData, apostasData] = await Promise.all([
-      campanhaService.getAll(),
-      campanhaOpcaoService.getAll(),
-      apostaService.getAll(),
-    ]);
+    try {
+      const [campanhasData, opcoesData, apostasData] = await Promise.all([
+        campanhaService.getAll(),
+        campanhaOpcaoService.getAll(),
+        apostaService.getAll(),
+      ]);
 
-    const idsUsuariosQueApostaram = new Set(
-      apostasData.map((aposta: Aposta) => aposta.usuario_id),
-    );
+      const idsUsuariosQueApostaram = new Set(
+        apostasData.map((aposta: Aposta) => aposta.usuario_id),
+      );
 
-    setCampanhas(campanhasData.length);
-    setOpcoes(opcoesData.length);
-    setApostas(apostasData.length);
-    setParticipantes(idsUsuariosQueApostaram.size);
+      setCampanhas(campanhasData.length);
+      setOpcoes(opcoesData.length);
+      setApostas(apostasData.length);
+      setParticipantes(idsUsuariosQueApostaram.size);
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "Erro ao carregar dashboard.",
+      );
+    }
   }
 
   useEffect(() => {
@@ -80,19 +87,24 @@ function ClienteDashboard() {
   const [loadingId, setLoadingId] = useState<number | null>(null);
 
   async function carregarDados() {
-    const [campanhasData, opcoesData] = await Promise.all([
-      campanhaService.getAll(),
-      campanhaOpcaoService.getAll(),
-    ]);
+    try {
+      const [campanhasData, opcoesData] = await Promise.all([
+        campanhaService.getAll(),
+        campanhaOpcaoService.getAll(),
+      ]);
 
-    setCampanhas(campanhasData);
-    setOpcoes(opcoesData);
+      setCampanhas(campanhasData);
+      setOpcoes(opcoesData);
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "Erro ao carregar campanhas.",
+      );
+    }
   }
 
   function opcoesDaCampanha(campanhaId: number) {
     return opcoes.filter(
-      (opcao) =>
-        opcao.campanha_id === campanhaId && opcao.status === "ATIVA",
+      (opcao) => opcao.campanha_id === campanhaId && opcao.status === "ATIVA",
     );
   }
 
@@ -101,7 +113,7 @@ function ClienteDashboard() {
     const meioPagamento = pagamentos[campanha.id] || "PIX";
 
     if (!opcaoId) {
-      alert("Selecione uma opção de palpite.");
+      toast.error("Selecione uma opção de palpite.");
       return;
     }
 
@@ -115,14 +127,20 @@ function ClienteDashboard() {
         comprovante: "",
       });
 
-      alert("Aposta criada com sucesso!");
+      toast.success("Aposta criada com sucesso!");
 
       setOpcoesSelecionadas({
         ...opcoesSelecionadas,
         [campanha.id]: 0,
       });
     } catch (error: any) {
-      alert(error?.response?.data?.mensagem || "Erro ao criar aposta");
+      const primeiroErro = error?.response?.data?.errors?.[0]?.mensagem;
+
+      toast.error(
+        primeiroErro ||
+          error?.response?.data?.message ||
+          "Erro ao criar aposta.",
+      );
     } finally {
       setLoadingId(null);
     }
